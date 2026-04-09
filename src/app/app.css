@@ -1,9 +1,9 @@
-/* Estructura principal */
-:host {
-  display: flex;
-  flex-direction: column;
+body {
+  background: url('/fondo3.png') no-repeat center center fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
-  background: url('/fondo3.png') no-repeat center/cover fixed;
 }
 
 /* Contenedor principal de la app */

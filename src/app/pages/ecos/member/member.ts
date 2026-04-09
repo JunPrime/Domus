@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router'; // Importar Router
 
 // Interfaz para Miembro
 export interface Miembro {
@@ -62,6 +63,9 @@ export class MemberComponent {
   
   miembroSeleccionado: Miembro | null = null;
   idMiembroActual = 0;
+
+  // Inyectar Router en el constructor
+  constructor(private router: Router) {}
 
   // Ver detalles
   verDetalles(miembro: Miembro) {
@@ -156,7 +160,21 @@ export class MemberComponent {
     miembro.activo = !miembro.activo;
   }
 
-  // Métodos auxiliares
+  // NUEVO MÉTODO: Navegar a actividades/tareas del miembro
+  navegarAActividades(miembro: Miembro) {
+    // Guardar el miembro seleccionado en localStorage o sessionStorage
+    // para que el componente actarea pueda saber qué miembro está activo
+    sessionStorage.setItem('miembroSeleccionado', JSON.stringify({
+      id: miembro.id_miembro,
+      nombre: miembro.nombre,
+      es_admin: miembro.es_admin
+    }));
+    
+    // Navegar al componente actarea
+    this.router.navigate(['/actarea']);
+  }
+
+  // Método auxiliar
   getRolTexto(esAdmin: boolean): string {
     return esAdmin ? 'Administrador' : 'Miembro';
   }

@@ -1,0 +1,55 @@
+<div class="app-container">
+    <!-- Encabezado -->
+    <div class="house-header">
+        <h2>🏠 Miembros del Hogar</h2>
+        <div class="member-status">👥 Sin miembros registrados</div>
+    </div>
+
+    <!-- CALENDARIO (parte superior) -->
+    <div class="calendar-section">
+        <div class="calendar-toolbar">
+            <button id="prevMonthBtn" class="nav-btn">◀</button>
+            <h3 id="monthYearDisplay" class="month-year"></h3>
+            <button id="nextMonthBtn" class="nav-btn">▶</button>
+        </div>
+        <div class="calendar-weekdays">
+            <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+    </div>
+
+    <!-- FORMULARIOS: Agregar Actividad / Tarea -->
+    <div class="forms-row">
+        <!-- Actividad (con hora) -->
+        <div class="form-card">
+            <h3>📅 Actividad</h3>
+            <input type="text" id="actividadNombre" placeholder="Nombre de la actividad">
+            <input type="datetime-local" id="actividadFechaHora">
+            <button id="agregarActividadBtn" class="btn-actividad">➕ Agregar Actividad</button>
+        </div>
+
+        <!-- Tarea del hogar (solo fecha) -->
+        <div class="form-card">
+            <h3>🧹 Tarea del hogar</h3>
+            <input type="text" id="tareaNombre" placeholder="Nombre de la tarea">
+            <input type="date" id="tareaFecha">
+            <button id="agregarTareaBtn" class="btn-tarea">➕ Agregar Tarea</button>
+        </div>
+    </div>
+
+    <!-- LISTADOS -->
+    <div class="listado-section">
+        <div class="listado-col">
+            <h3>📋 Actividades Programadas</h3>
+            <ul id="listaActividades" class="event-list"></ul>
+        </div>
+        <div class="listado-col">
+            <h3>✅ Tareas Pendientes</h3>
+            <ul id="listaTareasPendientes" class="event-list"></ul>
+            <div class="completadas-box">
+                <h4>✔️ Tareas Completadas</h4>
+                <ul id="listaTareasCompletadas" class="completed-list"></ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,6 @@
 /* Contenedor principal */
 .hogares-container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #0fa3a9;
   min-height: 100vh;
   padding: 30px;
   color: #333;
@@ -45,7 +44,7 @@
   text-align: center;
   max-width: 500px;
   margin: auto;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .empty-icon {
@@ -77,11 +76,11 @@
   gap: 20px;
 }
 
-/* Card */
+/* Card    box shadow para ts cambiar el color al mismo que tenga el hogar */
 .hogar-card {
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 20px rgb(255, 185, 185);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -112,7 +111,7 @@
 }
 
 .menu-btn {
-  background: rgba(255,255,255,0.3);
+  background: rgba(225, 255, 190, 0.3);
   border: none;
   border-radius: 6px;
   width: 30px;
@@ -122,7 +121,7 @@
 }
 
 .menu-btn:hover {
-  background: rgb(253, 218, 218);
+  background: rgb(255, 166, 166);
 }
 
 /* Body */
@@ -137,7 +136,7 @@
 }
 
 .entrar-btn {
-  background: rgba(252, 216, 216, 0.9);
+  background: rgba(248, 204, 204, 0.9);
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
@@ -169,7 +168,7 @@
 
 /* Modal contenido */
 .modal-content {
-  background: rgb(250, 211, 211);
+  background: rgb(240, 252, 227);
   border-radius: 12px;
   width: 400px;
   max-width: 90%;
@@ -217,7 +216,7 @@
   width: 100%;
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #fcbaba;
+  border: 1px solid #f6ffee;
 }
 
 /* Colores */
@@ -236,7 +235,7 @@
 }
 
 .color-box.selected {
-  border: 2px solid black;
+  border: 2px solid rgb(0, 0, 0);
 }
 
 /* Preview */
@@ -261,23 +260,31 @@
 }
 
 .btn-cancelar {
-  background: #ff9c9c;
+  background: #fff8d6;
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
+}
+.btn-cancelar:hover {
+  transition: all 0.5s ease;
+  background: #f9e07c;
 }
 
 .btn-guardar {
-  background: #dafca3;
-  color: rgb(247, 186, 186);
+  background: #fdc3c3;
+  color: rgb(0, 0, 0);
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
 }
+.btn-guardar:hover {
+  transition: all 0.5s ease;
+  background: #e6ffcd;
+}
 
 .btn-guardar:disabled {
-  background: #f77e7e;
+  background: #ffdbdb;
   cursor: not-allowed;
 }

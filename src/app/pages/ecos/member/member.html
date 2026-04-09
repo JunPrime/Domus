@@ -1,12 +1,12 @@
 <div class="member-container">
   <div class="header">
     <h2>👥 Miembros del Hogar</h2>
-    <button class="btn-agregar" (click)="abrirModalAgregar()"> Agregar Miembro</button>
+    <button class="btn-agregar" (click)="abrirModalAgregar()">➕ Agregar Miembro</button>
   </div>
 
   <!-- Mensaje cuando no hay miembros -->
   <div class="empty-state" *ngIf="miembros.length === 0">
-    <div class="empty-icon"></div>
+    <div class="empty-icon">👥</div>
     <h3>No hay miembros registrados</h3>
     <p>Haz clic en "Agregar Miembro" para comenzar</p>
   </div>
@@ -14,7 +14,7 @@
   <!-- Lista de miembros -->
   <div class="members-grid" *ngIf="miembros.length > 0">
     <div class="member-card" *ngFor="let m of miembros">
-      <div class="member-avatar"></div>
+      <div class="member-avatar">👤</div>
       
       <div class="member-info">
         <h3>{{ m.nombre }}</h3>
@@ -23,16 +23,18 @@
           <span class="badge status" [class.activo]="m.activo">{{ m.activo ? 'Activo' : 'Inactivo' }}</span>
         </div>
         <div class="preferencias" *ngIf="m.preferencias_alimenticias">
-           {{ m.preferencias_alimenticias | slice:0:50 }}
+          🍽️ {{ m.preferencias_alimenticias | slice:0:50 }}
         </div>
       </div>
       
       <div class="actions">
-        <button class="action-btn" (click)="verDetalles(m)" title="Ver detalles"></button>
-        <button class="action-btn" (click)="toggleActivo(m)" title="Cambiar estado"></button>
-        <button class="action-btn" (click)="abrirModalConfiguracion(m)" title="Configuración"></button>
-        <button class="action-btn" (click)="abrirModalEditar(m)" title="Editar"></button>
-        <button class="action-btn delete" (click)="abrirModalEliminar(m)" title="Eliminar"></button>
+        <!-- Botón principal: Ver Actividades y Tareas -->
+        <button class="action-btn actividades" (click)="navegarAActividades(m)" title="Ver Actividades y Tareas">📅</button>
+        <button class="action-btn" (click)="verDetalles(m)" title="Ver detalles">👁️</button>
+        <button class="action-btn" (click)="toggleActivo(m)" title="Cambiar estado">🔄</button>
+        <button class="action-btn" (click)="abrirModalConfiguracion(m)" title="Configuración">⚙️</button>
+        <button class="action-btn" (click)="abrirModalEditar(m)" title="Editar">✏️</button>
+        <button class="action-btn delete" (click)="abrirModalEliminar(m)" title="Eliminar">🗑️</button>
       </div>
     </div>
   </div>
@@ -40,20 +42,20 @@
   <!-- Modal de Detalles -->
   <div class="modal" *ngIf="modalDetallesVisible" (click)="cerrarDetalles()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3> Detalles del Miembro</h3>
+      <h3>📋 Detalles del Miembro</h3>
       <p><strong>ID:</strong> {{ miembroSeleccionado?.id_miembro }}</p>
       <p><strong>Nombre:</strong> {{ miembroSeleccionado?.nombre }}</p>
       <p><strong>Rol:</strong> {{ getRolTexto(miembroSeleccionado?.es_admin || false) }}</p>
       <p><strong>Estado:</strong> {{ miembroSeleccionado?.activo ? 'Activo' : 'Inactivo' }}</p>
       <p><strong>Preferencias:</strong> {{ miembroSeleccionado?.preferencias_alimenticias || 'No especificadas' }}</p>
-      <button (click)="cerrarDetalles()">Cerrar</button>
+      <button class="btn-cerrar" (click)="cerrarDetalles()">Cerrar</button>
     </div>
   </div>
 
   <!-- Modal de Agregar -->
   <div class="modal" *ngIf="modalAgregarVisible" (click)="modalAgregarVisible = false">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3> Agregar Miembro</h3>
+      <h3>➕ Agregar Miembro</h3>
       <input type="text" [(ngModel)]="nuevoMiembro.nombre" placeholder="Nombre completo" class="input-full">
       <label><input type="checkbox" [(ngModel)]="nuevoMiembro.es_admin"> Es administrador</label>
       <label><input type="checkbox" [(ngModel)]="nuevoMiembro.activo"> Activo</label>
@@ -68,7 +70,7 @@
   <!-- Modal de Editar -->
   <div class="modal" *ngIf="modalEditarVisible" (click)="modalEditarVisible = false">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3> Editar Miembro</h3>
+      <h3>✏️ Editar Miembro</h3>
       <input type="text" [(ngModel)]="miembroEditando.nombre" class="input-full">
       <label><input type="checkbox" [(ngModel)]="miembroEditando.es_admin"> Es administrador</label>
       <label><input type="checkbox" [(ngModel)]="miembroEditando.activo"> Activo</label>
@@ -83,7 +85,7 @@
   <!-- Modal de Configuración -->
   <div class="modal" *ngIf="modalConfigVisible" (click)="modalConfigVisible = false">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3> Configuración de Permisos</h3>
+      <h3>⚙️ Configuración de Permisos</h3>
       <label><input type="checkbox" [(ngModel)]="configEditando.crear_actividad"> Puede crear actividades</label>
       <label><input type="checkbox" [(ngModel)]="configEditando.crear_tarea"> Puede crear tareas</label>
       <label><input type="checkbox" [(ngModel)]="configEditando.administrar_miembros"> Puede administrar miembros</label>
@@ -97,7 +99,7 @@
   <!-- Modal de Eliminar -->
   <div class="modal" *ngIf="modalEliminarVisible" (click)="modalEliminarVisible = false">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="warning-icon"></div>
+      <div class="warning-icon">⚠️</div>
       <h3>¿Eliminar miembro?</h3>
       <p>¿Estás seguro de que quieres eliminar a <strong>"{{ miembroEditando.nombre }}"</strong>?</p>
       <p class="warning-text">Esta acción no se puede deshacer.</p>
