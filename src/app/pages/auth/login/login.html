@@ -1,40 +1,34 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2 class="login-title">Bienvenido</h2>
-    
+<div class="auth-container">
+  <div class="auth-header">
+    <i class="bi bi-house-fill"></i>
+    <h1>Administración del Hogar</h1>
+  </div>
+
+  <div class="auth-card">
+    <h2 class="auth-title">Bienvenido</h2>
+    <p class="auth-subtitle">Ingresa tus datos para iniciar sesión</p>
+
     <div class="error-message" *ngIf="error">
       {{ error }}
     </div>
-    
+
     <form (ngSubmit)="login()">
       <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input 
-          type="email" 
-          id="email" 
-          [(ngModel)]="email"
-          name="email"
-          placeholder="Ingresa tu correo" 
-        />
+        <label for="email">Correo electrónico *</label>
+        <input type="email" id="email" [(ngModel)]="email" name="email" placeholder="tu@email.com" />
       </div>
 
       <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input 
-          type="password" 
-          id="password" 
-          [(ngModel)]="password"
-          name="password"
-          placeholder="Ingresa tu contraseña" 
-        />
+        <label for="password">Contraseña *</label>
+        <input type="password" id="password" [(ngModel)]="password" name="password" placeholder="Mínimo 6 caracteres" />
       </div>
 
-      <button type="submit" class="login-btn" [disabled]="loading">
+      <button type="submit" class="auth-btn" [disabled]="loading">
         {{ loading ? 'Ingresando...' : 'Iniciar sesión' }}
       </button>
     </form>
-    
-    <p class="register-text">
+
+    <p class="auth-footer">
       ¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a>
     </p>
   </div>

@@ -1,35 +1,58 @@
 :host {
-  --primary-color: #cce5ff; 
-  --accent-color: #ffe5ec; 
-  --highlight-color: #fff8dc; 
+  --primary-gradient: linear-gradient(135deg, #cce5ff, #ffe5ec);
+  --card-bg: #fff;
+  --accent-color: #cce5ff;
+  --highlight-color: #ffe5ec;
   --dark-border: #444;
 }
 
-.register-container {
+.auth-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  background: var(--primary-gradient);
+  padding: 40px 20px;
 }
 
-.register-card {
-  background: #fff;
+.auth-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--dark-border);
+  margin-bottom: 30px;
+}
+
+.auth-header i {
+  font-size: 2rem;
+  color: var(--dark-border);
+}
+
+.auth-card {
+  background: var(--card-bg);
   padding: 40px;
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  width: 380px;
+  width: 100%;
+  max-width: 400px;
   border: 2px solid var(--dark-border);
 }
 
-.register-title {
+.auth-title {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
   color: var(--dark-border);
   font-size: 1.6rem;
 }
 
+.auth-subtitle {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #666;
+}
+
 .error-message {
-  background: #ffe5ec;
+  background: var(--highlight-color);
   color: #c00;
   padding: 10px;
   border-radius: 8px;
@@ -59,12 +82,12 @@ input {
 }
 
 input:focus {
-  border: 1px solid var(--primary-color);
+  border: 1px solid var(--highlight-color);
   outline: none;
-  box-shadow: 0 0 6px var(--primary-color);
+  box-shadow: 0 0 6px var(--highlight-color);
 }
 
-.register-btn {
+.auth-btn {
   width: 100%;
   padding: 14px;
   border: none;
@@ -76,7 +99,19 @@ input:focus {
   transition: background 0.2s, transform 0.1s;
 }
 
-.register-btn:hover {
+.auth-btn:hover {
   background: var(--accent-color);
   transform: scale(1.02);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+}
+
+.auth-footer a {
+  color: var(--dark-border);
+  text-decoration: none;
+  font-weight: bold;
 }

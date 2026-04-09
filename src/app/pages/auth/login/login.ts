@@ -11,7 +11,7 @@ import { CommonModule, DOCUMENT } from '@angular/common';
   styleUrls: ['./login.css']
 })
 export class Login {
-  private API_URL = '/Sesion/auth/login';
+  private API_URL = 'https://codigo-production.up.railway.app/Sesion/auth/login';
   
   email: string = '';
   password: string = '';

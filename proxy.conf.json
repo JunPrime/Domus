@@ -1,9 +1,0 @@
-
-{
-  "/Sesion": {
-    "target": "https://codigo-production.up.railway.app",
-    "secure": true,
-    "changeOrigin": true,
-    "logLevel": "debug"
-  }
-}
