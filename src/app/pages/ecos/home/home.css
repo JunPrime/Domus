@@ -1,0 +1,283 @@
+/* Contenedor principal */
+.hogares-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0fa3a9;
+  min-height: 100vh;
+  padding: 30px;
+  color: #333;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.header h1 {
+  color: white;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.crear-btn {
+  background: #bdffde;
+  color: #000000;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  
+}
+
+.crear-btn:hover {
+  transition: 0.5s;
+  background: #cde9fa;
+}
+
+/* Empty state */
+.empty-state {
+  background: rgb(255, 255, 255);
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 500px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+  width: 60px;
+  height: 60px;
+  background: #ffccb4;
+  border-radius: 50%;
+  margin: 0 auto 15px;
+}
+
+.crear-btn-empty {
+  margin-top: 15px;
+  background: #fcd1a1;
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.crear-btn-empty:hover {
+  transition: all 0.6s ease;
+  background: #f9b870;
+}
+
+/* Grid */
+.hogares-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+/* Card */
+.hogar-card {
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  transition: transform 0.5s ease;
+}
+
+.hogar-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Card header */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header h3 {
+  font-size: 18px;
+  margin: 0;
+}
+
+/* Botones menú */
+.card-menu {
+  display: flex;
+  gap: 5px;
+}
+
+.menu-btn {
+  background: rgba(255,255,255,0.3);
+  border: none;
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.menu-btn:hover {
+  background: rgb(253, 218, 218);
+}
+
+/* Body */
+.card-body {
+  margin: 15px 0;
+  font-size: 14px;
+}
+
+/* Footer */
+.card-footer {
+  text-align: right;
+}
+
+.entrar-btn {
+  background: rgba(252, 216, 216, 0.9);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.entrar-btn:hover {
+  transition: all 0.5s ease;
+  background: rgb(195, 252, 190);
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+/* Modal contenido */
+.modal-content {
+  background: rgb(250, 211, 211);
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+  padding: 20px;
+  animation: fadeIn 0.5s ease;
+}
+
+/* Animación */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Campos */
+.campo {
+  margin-top: 15px;
+}
+
+.campo label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.campo input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #fcbaba;
+}
+
+/* Colores */
+.color-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.color-box {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.color-box.selected {
+  border: 2px solid black;
+}
+
+/* Preview */
+.preview {
+  margin-top: 15px;
+}
+
+.preview-card {
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 5px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Modal acciones */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-cancelar {
+  background: #ff9c9c;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-guardar {
+  background: #dafca3;
+  color: rgb(247, 186, 186);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-guardar:disabled {
+  background: #f77e7e;
+  cursor: not-allowed;
+}

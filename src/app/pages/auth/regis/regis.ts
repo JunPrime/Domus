@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router,} from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,7 +11,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./regis.css']
 })
 export class Regis {
-  private API_URL = '/Sesion/auth/register';
+  // ✅ URL CORRECTA - API en Railway
+  private API_URL = 'https://codigo-production.up.railway.app/Sesion/auth/register';
   
   username: string = '';
   email: string = '';
@@ -58,6 +59,8 @@ export class Regis {
     this.error = '';
 
     try {
+      console.log('📡 Enviando a:', this.API_URL);
+
       const response = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
@@ -74,7 +77,6 @@ export class Regis {
 
       if (response.status === 201) {
         console.log('✅ Registro exitoso:', result);
-        // Redirigir al login después de registrar
         this.router.navigate(['/Login']);
       } else if (response.status === 400) {
         if (result.detail && result.detail.includes('correo')) {

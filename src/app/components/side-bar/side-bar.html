@@ -1,32 +1,45 @@
-
 <div class="sidebar-overlay" [class.active]="abierto" (click)="toggle()"></div>
 
 <div class="sidebar" [class.open]="abierto">
   <div class="sidebar-header">
     <div class="sidebar-logo">
       <i class="bi bi-house-heart-fill"></i>
-      <span>HogarApp</span>
+      <span>Domus</span>
     </div>
     <button class="sidebar-close" (click)="toggle()">
       <i class="bi bi-x-lg"></i>
     </button>
   </div>
-
+  
   <nav class="sidebar-nav">
     <ul class="nav-menu">
-      <li (click)="toggle()" routerLink="/"> 
+      <!-- CORREGIDO: Lobby es la página principal -->
+      <li (click)="toggle()" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"> 
         <i class="bi bi-house"></i> 
-        <span>Inicio</span> 
-        </li>
-      <li (click)="toggle()" routerLink="/settings"> 
+        <span>Lobby</span> 
+      </li>
+      
+      <!-- CORREGIDO: Home ahora apunta a /Home (con H mayúscula como en routes) -->
+      <li (click)="toggle()" routerLink="/home" routerLinkActive="active"> 
+        <i class="bi bi-house-door"></i> 
+        <span>Home</span> 
+      </li>
+      
+      <li (click)="toggle()" routerLink="/settings" routerLinkActive="active"> 
         <i class="bi bi-gear"></i> 
         <span>Ajustes</span> 
       </li>
+
+            <li (click)="toggle()" routerLink="/settings" routerLinkActive="active"> 
+        <i class="bi bi-gear"></i> 
+        <span>dashboard</span> 
+      </li>
+
     </ul>
   </nav>
 
   <div class="sidebar-footer">
-    <button class="logout-btn" (click)=" toggle()">
+    <button class="logout-btn" (click)="logout()">
       <i class="bi bi-box-arrow-right"></i>
       <span>Cerrar Sesión</span>
     </button>

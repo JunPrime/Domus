@@ -16,7 +16,10 @@
 .bg-pastel-mint { background-color: var(--pastel-mint) !important; }
 .bg-pastel-sky { background-color: var(--pastel-sky) !important; }
 .bg-pastel-yellow { background-color: var(--pastel-yellow) !important; }
-.bg-pastel-lavender { background-color: var(#e3a3f7) !important; }
+
+/* 🔧 ARREGLO */
+.bg-pastel-lavender { background-color: var(--pastel-lavender) !important; }
+
 .bg-pastel-lavender-light { background-color: #f3eef9 !important; }
 .bg-pastel-cream { background-color: var(--pastel-cream) !important; }
 .bg-pastel-brown { background-color: var(--pastel-brown) !important; }
@@ -26,7 +29,12 @@
 .text-pastel-gray { color: var(--pastel-gray) !important; }
 .text-pastel-primary { color: var(--pastel-primary) !important; }
 
-.border-pastel-primary { border-color: var(--pastel-primary) !important; }
+/* 🔥 CLAVE: sobreescribir Bootstrap */
+.text-secondary {
+  color: var(--pastel-gray) !important;
+}
+
+.border-pastel-primary { border-color: var() !important; }
 
 /* NUEVO: color pastel para el título de funcionalidades */
 .features-title {
@@ -35,52 +43,69 @@
 
 /* Botones personalizados pastel */
 .btn-pastel-primary {
-  background-color: var(#a8f5a8);
-  color: rgb(85, 84, 84);
+  /* 🔧 ARREGLO */
+  background-color: #fdc2d4;
+  color: rgb(99, 98, 98);
   border: none;
   transition: all 0.5s ease;
 }
+
 .btn-pastel-primary:hover {
   background-color: #ee9f87;
   color: rgb(0, 0, 0);
   border: none;
 }
+
 .btn-outline-pastel-primary {
-  border: 1px solid var(--pastel-primary);
-  color: var(#f5afd0);
+  border: 1px solid var(#d4e8d4);
+
+  background-color: #fdc2d4;
+
   transition: all 0.5s ease;
 }
-/* ARREGLO: hover consistente con “Crear cuenta gratis” */
+
 .btn-outline-pastel-primary:hover {
-  background-color: var(#f8a4a4);
-  color: rgb(0, 0, 0);
+  background-color: #ffa5a5;
+  color: rgb(99, 98, 98);
 }
 
 /* Sección hero con fondo rosa muy claro */
 .hero-section {
-  background-color: #fce9e7; /* Rosa pálido */
+  background-color: #fce9e7;
   border-bottom: 1px solid rgba(109, 92, 99, 0.05);
-  color: var(--pastel-brown); /* añadido */
+  color: var(rgb(226, 154, 172));
+}
+
+/* 🔥 EXTRA: asegurar textos dentro del hero */
+.hero-section .text-secondary {
+  color: var(#7e8a8b) !important;
 }
 
 /* Efectos hover para tarjetas */
 .hover-shadow {
   transition: all 0.5s ease;
-  color: var(--pastel-gray); /* añadido */
+  color: var(#7e8a8b);
 }
+
 .hover-shadow:hover {
   transform: translateY(-5px);
   box-shadow: 0 1rem 2rem rgba(109, 92, 99, 0.1) !important;
 }
+
 .transition {
   transition: all 0.5s ease;
-  color: var(--pastel-gray); /* añadido */
+  color: var(#fdb9a8);
 }
 
 /* Ajuste de texto en badges */
 .badge {
   font-weight: 500;
-  color: var(--pastel-brown); /* añadido */
+  color: var(#967784);
+}
+
+/* 🔥 EXTRA: badges blancos se vean pastel */
+.badge.bg-white {
+  background-color: #fffaf7 !important;
 }
 
 /* Footer ajuste de color de texto */
@@ -91,6 +116,49 @@ footer .text-white {
 @media (max-width: 768px) {
   .display-4 {
     font-size: calc(1.5rem + 2vw);
-    color: var(--pastel-primary); /* añadido */
+    color: var(#e0d4f0);
   }
+}
+/* 🌸 CARDS EN MODO PASTEL */
+
+/* Fondo suave para todas las cards */
+#services .card {
+  background-color: #f7ecdd !important;
+  border-radius: 1.2rem;
+}
+
+/* Variación por posición (efecto elegante automático) */
+#services .col-lg-4:nth-child(1) .card {
+  background-color: var(rgb(127, 255, 202)) !important;
+}
+
+#services .col-lg-4:nth-child(2) .card {
+  background-color: var(#7cfdb6) !important;
+}
+
+#services .col-lg-4:nth-child(3) .card {
+  background-color: var(rgb(255, 0, 0)) !important;
+}
+
+#services .col-lg-4:nth-child(4) .card {
+  background-color: var(#fff9c0) !important;
+}
+
+#services .col-lg-4:nth-child(5) .card {
+  background-color: var(#ff0000) !important;
+}
+
+/* Texto dentro de las cards más suave */
+#services .card p {
+  color: var(rgb(211, 255, 197)) !important;
+}
+
+/* Títulos */
+#services .card h3 {
+  color: var(#2600ff);
+}
+
+/* Iconos */
+#services .card i {
+  color: var(#00d9ff);
 }

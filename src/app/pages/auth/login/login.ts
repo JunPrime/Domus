@@ -11,7 +11,9 @@ import { CommonModule, DOCUMENT } from '@angular/common';
   styleUrls: ['./login.css']
 })
 export class Login {
+  // URL directa - SIN PROXY
   private API_URL = 'https://codigo-production.up.railway.app/Sesion/auth/login';
+  private API_ME_URL = 'https://codigo-production.up.railway.app/Sesion/auth/me';
   
   email: string = '';
   password: string = '';
@@ -39,12 +41,14 @@ export class Login {
     this.error = '';
 
     try {
-      // Login con OAuth2PasswordRequestForm
+      // Paso 1: Login
       const formData = new URLSearchParams();
       formData.set('username', this.email);
       formData.set('password', this.password);
 
-      const response = await fetch(this.API_URL, {
+      console.log('📡 Enviando login a:', this.API_URL);
+
+      const loginResponse = await fetch(this.API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -52,39 +56,64 @@ export class Login {
         body: formData.toString()
       });
 
-      const result = await response.json();
+      const loginResult = await loginResponse.json();
 
-      if (response.status === 200) {
-        console.log('✅ Login exitoso:', result);
+      if (loginResponse.status === 200) {
+        console.log('✅ Login exitoso:', loginResult);
         
-        // Guardar datos del usuario
-        const usuarioData = {
-          id: result.id || 1,
-          email: this.email,
-          access_token: result.access_token,
-          refresh_token: result.refresh_token,
-          token_type: result.token_type
-        };
+        const accessToken = loginResult.access_token;
+        const tokenType = loginResult.token_type || 'bearer';
         
-        localStorage.setItem('usuario', JSON.stringify(usuarioData));
-        localStorage.setItem('access_token', result.access_token);
-        localStorage.setItem('refresh_token', result.refresh_token);
-        
-        // Disparar evento para actualizar estado
-        const evento = new CustomEvent('authChange', { 
-          detail: { isLoggedIn: true } 
+        localStorage.setItem('access_token', accessToken);
+        localStorage.setItem('refresh_token', loginResult.refresh_token);
+        localStorage.setItem('token_type', tokenType);
+
+        // Paso 2: Obtener /me
+        console.log('📡 Obteniendo datos de /me');
+
+        const meResponse = await fetch(this.API_ME_URL, {
+          method: 'GET',
+          headers: {
+            'Authorization': `${tokenType} ${accessToken}`,
+            'Content-Type': 'application/json',
+          }
         });
-        this.document.dispatchEvent(evento);
-        
-        // Redirigir
-        this.router.navigate(['/members']);
+
+        if (meResponse.status === 200) {
+          const userData = await meResponse.json();
+          console.log('✅ Datos del usuario:', userData);
+          
+          const usuarioData = {
+            id: userData.id_usuario,
+            nombre: userData.nombre,
+            correo: userData.correo,
+            email: userData.correo,
+            fecha_registro: userData.fecha_registro,
+            access_token: accessToken,
+            refresh_token: loginResult.refresh_token,
+            token_type: tokenType
+          };
+          
+          localStorage.setItem('usuario', JSON.stringify(usuarioData));
+          
+          const evento = new CustomEvent('authChange', { 
+            detail: { isLoggedIn: true, user: usuarioData } 
+          });
+          this.document.dispatchEvent(evento);
+          
+          this.router.navigate(['/members']);
+        } else {
+          const errorData = await meResponse.json();
+          this.loading = false;
+          this.error = errorData.detail || '⚠ Error al obtener datos del usuario';
+        }
       } else {
         this.loading = false;
         
-        if (response.status === 401) {
+        if (loginResponse.status === 401) {
           this.error = '⚠ Correo o contraseña incorrectos';
         } else {
-          this.error = result.detail || '⚠ Error al iniciar sesión';
+          this.error = loginResult.detail || '⚠ Error al iniciar sesión';
         }
       }
       

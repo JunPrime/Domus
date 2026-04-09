@@ -1,1 +1,97 @@
-<p>home works!</p>
+<div class="hogares-container">
+  <div class="header">
+    <h1> Mis Hogares</h1>
+    <button class="crear-btn" (click)="abrirModal()">
+       Crear Hogar
+    </button>
+  </div>
+
+  <!-- Mensaje cuando no hay hogares -->
+  <div class="empty-state" *ngIf="hogares.length === 0">
+    <div class="empty-icon"></div>
+    <h3>No tienes hogares creados</h3>
+    <p>Comienza creando tu primer hogar</p>
+    <button class="crear-btn-empty" (click)="abrirModal()">
+       Crear mi primer hogar
+    </button>
+  </div>
+
+  <!-- Grid de hogares -->
+  <div class="hogares-grid" *ngIf="hogares.length > 0">
+    <div class="hogar-card" *ngFor="let hogar of hogares; trackBy: trackById"
+         [style.background]="hogar.color" 
+         [style.color]="hogar.textColor">
+      
+      <div class="card-header">
+        <h3>{{ hogar.titulo }}</h3>
+        <div class="card-menu">
+          <button class="menu-btn" (click)="editarHogar(hogar)">
+            
+          </button>
+          <button class="menu-btn" (click)="eliminarHogar(hogar)">
+            
+          </button>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <p>ID: {{ hogar.id }}</p>
+      </div>
+      
+      <div class="card-footer">
+        <button class="entrar-btn" (click)="entrarHogar(hogar)">
+          Entrar al hogar →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear hogar -->
+  <div class="modal" [class.active]="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2> Crear Nuevo Hogar</h2>
+        <button class="modal-close" (click)="cerrarModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="campo">
+          <label> Nombre del hogar:</label>
+          <input 
+            type="text" 
+            [(ngModel)]="nuevoTitulo" 
+            placeholder="Ej: Mi Casa, Departamento, etc."
+            autofocus />
+        </div>
+
+        <div class="campo">
+          <label> Color de la card:</label>
+          <div class="color-options">
+            <div 
+              class="color-box" 
+              *ngFor="let color of coloresPastel" 
+              [style.background]="color"
+              [class.selected]="nuevoColor === color"
+              (click)="nuevoColor = color">
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista previa -->
+        <div class="preview" *ngIf="nuevoTitulo.trim().length > 0">
+          <label>📱 Vista previa:</label>
+          <div class="preview-card" [style.background]="nuevoColor" [style.color]="textColors[nuevoColor]">
+            {{ nuevoTitulo }}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-guardar" (click)="guardarHogar()" [disabled]="!nuevoTitulo.trim()">
+          💾 Guardar Hogar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
