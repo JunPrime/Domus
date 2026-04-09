@@ -1,1 +1,37 @@
 /* You can add global styles to this file, and also import other style files */
+
+
+body.oscuro {
+  background: #121212;
+  color: white;
+}
+
+body.claro {
+  background: white;
+  color: black;
+}
+
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+
+}
+
+/* Scroll suave */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Eliminar bordes de focus en algunos elementos */
+button:focus, 
+a:focus,
+input:focus {
+  outline: none;
+}

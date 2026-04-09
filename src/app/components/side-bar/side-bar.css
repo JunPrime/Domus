@@ -1,0 +1,134 @@
+:host {
+  --sidebar-width: 280px;
+  --primary-color: #cce5ff;  
+  --accent-color: #ffe5ec;    
+  --highlight-color: #fff8dc;
+  --dark-border: #444;        
+}
+
+
+.hamburger-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 2rem;
+  border: none;
+  cursor: pointer;
+  z-index: 900;
+  color: var(--primary-color);
+}
+
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: calc(-1 * var(--sidebar-width));
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: #fafafa; /* fondo gris muy claro */
+  transition: all 0.3s ease-in-out;
+  z-index: 1001;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+  border-right: 2px solid var(--dark-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+.sidebar-header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--dark-border);
+  background: var(--accent-color);
+}
+
+.sidebar-logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--dark-border);
+}
+
+.sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+.sidebar-close:hover {
+  color: var(--primary-color);
+}
+
+
+.nav-menu {
+  list-style: none;
+  padding: 20px 0;
+  margin: 0;
+}
+
+.nav-menu li {
+  padding: 15px 20px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #333;
+  border-left: 4px solid transparent;
+  transition: background 0.2s, color 0.2s, border-left 0.2s;
+}
+
+.nav-menu li:hover {
+  background: var(--highlight-color);
+  color: var(--dark-border);
+  border-left: 4px solid var(--primary-color);
+}
+
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 2px solid var(--dark-border);
+  background: var(--accent-color);
+}
+
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #dc3545;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #ffeef2;
+}

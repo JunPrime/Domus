@@ -1,0 +1,76 @@
+/* Estructura principal */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: url('/fondo3.png') no-repeat center/cover fixed;
+}
+
+/* Contenedor principal de la app */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Contenido principal */
+main {
+  margin-top: 70px;
+  padding: 20px;
+  min-height: calc(100vh - 130px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+}
+
+/* Ajuste cuando el sidebar está abierto */
+main.sidebar-open {
+  margin-left: 280px;
+}
+
+/* Footer siempre al final */
+app-footer {
+  display: block;
+  margin-top: auto;
+}
+
+/* Sidebar - asegurar que se muestre correctamente */
+app-side-bar {
+  display: block;
+}
+
+/* Asegurar que el router-outlet no cause problemas */
+router-outlet {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  main {
+    margin-top: 60px;
+    padding: 15px;
+    min-height: calc(100vh - 120px);
+  }
+  
+  main.sidebar-open {
+    margin-left: 260px;
+  }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 480px) {
+  main {
+    margin-top: 55px;
+    padding: 10px;
+    min-height: calc(100vh - 110px);
+  }
+  
+  main.sidebar-open {
+    margin-left: 0;
+  }
+}
+
+/* Prevenir scroll cuando el sidebar está abierto en móvil */
+body.sidebar-open {
+  overflow: hidden;
+}

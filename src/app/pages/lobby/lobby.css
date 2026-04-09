@@ -1,0 +1,96 @@
+/* Definición de variables de colores pastel */
+:root {
+  --pastel-rose: #f8d5d3;
+  --pastel-mint: #d4e8d4;
+  --pastel-sky: #d4e2f0;
+  --pastel-yellow: #f9f0d4;
+  --pastel-lavender: #e0d4f0;
+  --pastel-cream: #fdf8f2;
+  --pastel-brown: #6d5c63;
+  --pastel-gray: #7e8a8b;
+  --pastel-primary: #c9b6b0;
+}
+
+/* Clases de utilidad para fondos y textos pastel */
+.bg-pastel-rose { background-color: var(--pastel-rose) !important; }
+.bg-pastel-mint { background-color: var(--pastel-mint) !important; }
+.bg-pastel-sky { background-color: var(--pastel-sky) !important; }
+.bg-pastel-yellow { background-color: var(--pastel-yellow) !important; }
+.bg-pastel-lavender { background-color: var(#e3a3f7) !important; }
+.bg-pastel-lavender-light { background-color: #f3eef9 !important; }
+.bg-pastel-cream { background-color: var(--pastel-cream) !important; }
+.bg-pastel-brown { background-color: var(--pastel-brown) !important; }
+
+.text-pastel-rose { color: #c97e7a !important; }
+.text-pastel-brown { color: var(--pastel-brown) !important; }
+.text-pastel-gray { color: var(--pastel-gray) !important; }
+.text-pastel-primary { color: var(--pastel-primary) !important; }
+
+.border-pastel-primary { border-color: var(--pastel-primary) !important; }
+
+/* NUEVO: color pastel para el título de funcionalidades */
+.features-title {
+  color: var(--pastel-primary) !important;
+}
+
+/* Botones personalizados pastel */
+.btn-pastel-primary {
+  background-color: var(#a8f5a8);
+  color: rgb(85, 84, 84);
+  border: none;
+  transition: all 0.5s ease;
+}
+.btn-pastel-primary:hover {
+  background-color: #ee9f87;
+  color: rgb(0, 0, 0);
+  border: none;
+}
+.btn-outline-pastel-primary {
+  border: 1px solid var(--pastel-primary);
+  color: var(#f5afd0);
+  transition: all 0.5s ease;
+}
+/* ARREGLO: hover consistente con “Crear cuenta gratis” */
+.btn-outline-pastel-primary:hover {
+  background-color: var(#f8a4a4);
+  color: rgb(0, 0, 0);
+}
+
+/* Sección hero con fondo rosa muy claro */
+.hero-section {
+  background-color: #fce9e7; /* Rosa pálido */
+  border-bottom: 1px solid rgba(109, 92, 99, 0.05);
+  color: var(--pastel-brown); /* añadido */
+}
+
+/* Efectos hover para tarjetas */
+.hover-shadow {
+  transition: all 0.5s ease;
+  color: var(--pastel-gray); /* añadido */
+}
+.hover-shadow:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 2rem rgba(109, 92, 99, 0.1) !important;
+}
+.transition {
+  transition: all 0.5s ease;
+  color: var(--pastel-gray); /* añadido */
+}
+
+/* Ajuste de texto en badges */
+.badge {
+  font-weight: 500;
+  color: var(--pastel-brown); /* añadido */
+}
+
+/* Footer ajuste de color de texto */
+footer .text-white {
+  color: rgba(19, 18, 18, 0.9) !important;
+}
+
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: calc(1.5rem + 2vw);
+    color: var(--pastel-primary); /* añadido */
+  }
+}

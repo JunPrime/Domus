@@ -1,0 +1,124 @@
+.footer {
+  background: linear-gradient(180deg, #d4e9d6 0%, #c5dfc7 100%);
+  color: #2d6a4f;
+  padding: 2rem 1rem 1rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(45, 106, 79, 0.2);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-section h4 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #1b4d3e;
+  font-weight: 600;
+}
+
+.footer-section p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-section ul li i {
+  font-size: 0.9rem;
+  width: 20px;
+}
+
+.footer-section a {
+  color: #2d6a4f;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.footer-section a:hover {
+  color: #1b4d3e;
+  text-decoration: underline;
+  padding-left: 3px;
+}
+
+/* Redes sociales */
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  background: rgba(45, 106, 79, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+  background: #2d6a4f;
+  transform: translateY(-3px);
+}
+
+.social-links a i {
+  font-size: 1.1rem;
+}
+
+.social-links a:hover i {
+  color: white;
+}
+
+/* Footer bottom */
+.footer-bottom {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(45, 106, 79, 0.2);
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .footer-section ul li {
+    justify-content: center;
+  }
+  
+  .social-links {
+    justify-content: center;
+  }
+  
+  .footer {
+    padding: 1.5rem 1rem 1rem;
+  }
+}

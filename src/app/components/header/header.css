@@ -1,0 +1,166 @@
+/* Estilos personalizados para el header */
+.navbar {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: 0.4rem 1rem;
+  background-color: #d4e9d6 !important; /* Verde pastel claro */
+}
+
+.navbar-brand {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  color: #2d6a4f !important; /* Verde oscuro para contraste */
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+  opacity: 0.8;
+  color: #1b4d3e !important;
+}
+
+.nav-link.active {
+  color: #1b4d3e !important;
+  font-weight: 600;
+  background-color: rgba(27, 77, 62, 0.1);
+  border-radius: 8px;
+}
+
+.nav-link i {
+  margin-right: 6px;
+  font-size: 0.9rem;
+}
+
+/* Estilo para el dropdown del perfil */
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-top: 8px;
+  border: none;
+  background-color: white;
+}
+
+.dropdown-item {
+  padding: 6px 16px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #2d6a4f;
+}
+
+.dropdown-item:hover {
+  background-color: #d4e9d6;
+  transform: translateX(3px);
+  color: #1b4d3e;
+}
+
+.dropdown-item i {
+  margin-right: 8px;
+  width: 18px;
+  font-size: 0.9rem;
+}
+
+/* Imagen de perfil circular */
+.rounded-circle {
+  border: 2px solid #2d6a4f;
+  transition: all 0.3s ease;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.rounded-circle:hover {
+  transform: scale(1.05);
+  border-color: #1b4d3e;
+}
+
+/* Dropdown toggle sin padding extra */
+.dropdown-toggle {
+  padding: 0 !important;
+}
+
+.dropdown-toggle::after {
+  display: none; /* Oculta la flecha del dropdown */
+}
+
+/* Botón de menú para abrir el sidebar */
+.menu-toggle {
+  background: none;
+  border: none;
+  color: #2d6a4f;
+  font-size: 1.4rem;
+  padding: 0.3rem 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.menu-toggle:hover {
+  background-color: rgba(45, 106, 79, 0.1);
+  transform: scale(1.05);
+}
+
+/* Centrar el menú principal */
+.container-fluid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.navbar-nav.justify-content-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar-nav.justify-content-center > ul {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-nav.justify-content-center .nav-item {
+  margin: 0;
+}
+
+/* Navbar toggler (botón hamburguesa) */
+.navbar-toggler {
+  border-color: #2d6a4f;
+  padding: 0.2rem 0.5rem;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%232d6a4f' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .navbar {
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .navbar-nav {
+    text-align: center;
+    margin: 8px 0;
+  }
+  
+  .navbar-nav.ms-auto {
+    margin-top: 8px;
+  }
+  
+  .dropdown-menu {
+    text-align: center;
+  }
+  
+  .nav-link {
+    padding: 0.5rem;
+  }
+}
