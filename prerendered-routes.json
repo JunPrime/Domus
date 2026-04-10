@@ -1,0 +1,12 @@
+{
+  "routes": {
+    "/Domus": {},
+    "/Domus/actarea": {},
+    "/Domus/header": {},
+    "/Domus/home": {},
+    "/Domus/lobby": {},
+    "/Domus/login": {},
+    "/Domus/member": {},
+    "/Domus/register": {}
+  }
+}
