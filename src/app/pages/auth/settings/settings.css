@@ -1,0 +1,534 @@
+/* ==================== VARIABLES ==================== */
+:root {
+  --pastel-azul: #AEC6CF;
+  --pastel-azul-claro: #E8F4F8;
+  --pastel-azul-intenso: #8BB3C0;
+  --pastel-morado: #D4B8D4;
+  --pastel-morado-claro: #F3E8FF;
+  --pastel-rosa: #FFD1DC;
+  --pastel-verde: #B5EAD7;
+  --pastel-verde-intenso: #9AD5B8;
+  --pastel-naranja: #FFD8B1;
+  --pastel-durazno: #FFDAB9;
+  --pastel-lavanda: #E6E6FA;
+  --pastel-lavanda-claro: #F0E8FF;
+  --blanco: #FFFFFF;
+  --gris-perla: #F5F5F5;
+  --gris-suave: #E8E8E8;
+  --gris-medio: #D4D4D4;
+  --texto-oscuro: #4A4A4A;
+  --texto-suave: #6B6B6B;
+  --sombra-suave: rgba(0, 0, 0, 0.05);
+  --sombra-media: rgba(0, 0, 0, 0.1);
+  --sombra-fuerte: rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== BOTÓN PARA ABRIR SETTINGS ==================== */
+.btn-open-settings {
+  background: linear-gradient(135deg, var(--pastel-durazno), var(--pastel-naranja));
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.5s ease;
+  color: var(--texto-oscuro);
+  box-shadow: 0 2px 8px var(--sombra-suave);
+}
+
+.btn-open-settings:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--sombra-media);
+}
+
+.btn-open-settings i {
+  font-size: 1.2rem;
+}
+
+/* ==================== OVERLAY ==================== */
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  animation: fadeIn 0.5s ease;
+}
+
+/* ==================== PANEL DE SETTINGS ==================== */
+.settings-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: 90%;
+  max-width: 580px;
+  max-height: 85vh;
+  background: linear-gradient(135deg, var(--blanco), var(--pastel-lavanda-claro));
+  border-radius: 28px;
+  box-shadow: 0 25px 50px var(--sombra-fuerte);
+  z-index: 1001;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.settings-panel.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ==================== HEADER DEL PANEL ==================== */
+.settings-header {
+  background: linear-gradient(135deg, var(--pastel-azul), var(--pastel-morado));
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.header-icon {
+  background: rgba(255, 255, 255, 0.25);
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon i {
+  font-size: 1.6rem;
+  color: var(--texto-oscuro);
+}
+
+.settings-header h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--texto-oscuro);
+}
+
+.btn-close {
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s;
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: rotate(90deg);
+}
+
+.btn-close i {
+  font-size: 1.2rem;
+  color: var(--texto-oscuro);
+}
+
+/* ==================== BODY DEL PANEL ==================== */
+.settings-body {
+  padding: 20px 24px;
+  max-height: calc(85vh - 85px);
+  overflow-y: auto;
+}
+
+/* ==================== SECCIONES ==================== */
+.settings-section {
+  margin-bottom: 28px;
+  animation: slideIn 0.5s ease;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--gris-suave);
+}
+
+.section-title i {
+  font-size: 1.3rem;
+  color: var(#dd92ff);
+}
+
+.section-title h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(#000000);
+}
+
+/* ==================== IDIOMA ==================== */
+.idioma-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.idioma-btn {
+  flex: 1;
+  padding: 12px;
+  background: var(--gris-perla);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.5s;
+}
+
+.idioma-btn.active {
+  background: linear-gradient(135deg, var(--pastel-azul), var(--pastel-morado));
+  border-color: var(#dd92ff);
+  color: var(#000000);
+}
+
+.idioma-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--sombra-media);
+}
+
+.idioma-btn i {
+  font-size: 1rem;
+  color: var(#9dffaa);
+}
+
+.flag {
+  font-size: 1.3rem;
+}
+
+/* ==================== PALETAS ==================== */
+.paletas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.paleta-card {
+  background: var(#ffffff);
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px var(#454645);
+}
+
+.paleta-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px var(#353535);
+}
+
+.paleta-card.active {
+  border-color: var(#e89dff);
+  background: var(#D4B8D4);
+}
+
+.paleta-preview {
+  display: flex;
+  height: 40px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.color-bar {
+  flex: 1;
+}
+
+.paleta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.paleta-nombre {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--texto-oscuro);
+}
+
+.paleta-info i {
+  color: var(--pastel-verde-intenso);
+  font-size: 1rem;
+}
+
+/* ==================== FUENTES ==================== */
+.fuentes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.fuente-card {
+  background: var(--gris-perla);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.fuente-card:hover {
+  transform: translateY(-2px);
+  background: var(--gris-suave);
+}
+
+.fuente-card.active {
+  background: linear-gradient(135deg, var(--pastel-azul-claro), var(--pastel-lavanda));
+  border-color: var(--pastel-azul);
+}
+
+.fuente-nombre {
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.fuente-preview {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.fuente-card i {
+  color: var(--pastel-verde-intenso);
+  font-size: 0.9rem;
+}
+
+/* ==================== TAMAÑO DE TEXTO ==================== */
+.tamanio-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tamanio-slider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.tamanio-btn {
+  background: var(--pastel-azul);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.tamanio-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+  background: var(--pastel-azul-intenso);
+}
+
+.tamanio-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tamanio-btn i {
+  font-size: 1.2rem;
+  color: var(--texto-oscuro);
+}
+
+.tamanio-valor {
+  background: var(--gris-perla);
+  padding: 8px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.numero {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--texto-oscuro);
+}
+
+.unidad {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.tamanio-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px;
+  background: var(--gris-perla);
+  border-radius: 16px;
+}
+
+.tamanio-preview i {
+  font-size: 1.2rem;
+  color: var(--pastel-azul);
+}
+
+.preview-text {
+  color: var(--texto-oscuro);
+  font-weight: 500;
+}
+
+/* ==================== BOTONES DE ACCIÓN ==================== */
+.settings-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid var(--gris-suave);
+}
+
+.btn-reset, .btn-save {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-reset {
+  background: var(--pastel-rosa);
+  color: var(--texto-oscuro);
+}
+
+.btn-save {
+  background: linear-gradient(135deg, var(--pastel-verde), var(--pastel-verde-intenso));
+  color: var(--texto-oscuro);
+}
+
+.btn-reset:hover, .btn-save:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.97);
+}
+
+.btn-reset i, .btn-save i {
+  font-size: 1rem;
+}
+
+/* ==================== ANIMACIONES ==================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== SCROLLBAR ==================== */
+.settings-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.settings-body::-webkit-scrollbar-track {
+  background: var(--gris-perla);
+  border-radius: 10px;
+}
+
+.settings-body::-webkit-scrollbar-thumb {
+  background: var(--pastel-azul);
+  border-radius: 10px;
+}
+
+.settings-body::-webkit-scrollbar-thumb:hover {
+  background: var(--pastel-morado);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 600px) {
+  .settings-panel {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .settings-header {
+    padding: 16px 20px;
+  }
+  
+  .settings-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .settings-body {
+    padding: 16px 20px;
+  }
+  
+  .paletas-grid,
+  .fuentes-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .idioma-buttons {
+    flex-direction: column;
+  }
+  
+  .settings-actions {
+    flex-direction: column;
+  }
+  
+  .tamanio-preview {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .tamanio-preview i {
+    display: none;
+  }
+  
+  .btn-open-settings span {
+    display: none;
+  }
+  
+  .btn-open-settings {
+    padding: 10px 12px;
+  }
+}

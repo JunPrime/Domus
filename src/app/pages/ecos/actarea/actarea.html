@@ -8,14 +8,12 @@
         <span class="brand-text">ActArea</span>
       </div>
       
-      <!-- Botón para colapsar/expandir el calendario -->
       <button class="btn-toggle-calendario" type="button" (click)="toggleCalendario()">
         <i class="bi" [class.bi-calendar-week]="!calendarioVisible" [class.bi-calendar-x]="calendarioVisible"></i>
         <span>{{ calendarioVisible ? 'Ocultar Calendario' : 'Mostrar Calendario' }}</span>
         <i class="bi" [class.bi-chevron-up]="calendarioVisible" [class.bi-chevron-down]="!calendarioVisible"></i>
       </button>
       
-      <!-- Estadísticas -->
       <div class="stats-badges">
         <span class="badge-actividad-header">
           <i class="bi bi-calendar-event"></i> {{actividadesPendientesCount}}
@@ -27,7 +25,7 @@
     </div>
   </nav>
 
-  <!-- CALENDARIO COLAPSABLE - Siempre visible pero se puede contraer -->
+  <!-- CALENDARIO -->
   <div class="calendario-wrapper" [class.collapsed]="!calendarioVisible">
     <div class="calendario-section">
       <div class="calendario-toolbar">
@@ -72,27 +70,94 @@
 
   <!-- Formularios -->
   <div class="formularios-row">
+    
     <!-- Formulario Actividad -->
     <div class="formulario-card actividad-form">
       <h3><i class="bi bi-calendar-plus"></i> Nueva Actividad</h3>
+
       <div class="campo-form">
-        <input type="text" 
-               [(ngModel)]="nuevaActividadNombre" 
+        <input type="text"
+               [(ngModel)]="nuevaActividadNombre"
                placeholder="Ej: Ir a trabajar, Estudiar, Reunión..."
                class="input-text">
       </div>
-      <div class="campo-form">
-        <input type="text" 
-               [(ngModel)]="nuevaActividadDescripcion" 
-               placeholder="Descripción (opcional)"
-               class="input-text">
+
+      <div class="campo-form datetime-group">
+        <label> Fecha y Hora</label>
+        <div class="datetime-wrapper">
+          <input type="datetime-local"
+                 [(ngModel)]="nuevaActividadFechaHoraTemp"
+                 class="input-date">
+          <button type="button"
+                  class="btn-confirmar-fecha"
+                  (click)="confirmarFechaHoraActividad()"
+                  [disabled]="!nuevaActividadFechaHoraTemp">
+            <i class="bi bi-check-lg"></i> Confirmar
+          </button>
+        </div>
+
+        <div *ngIf="nuevaActividadFechaHoraConfirmada" class="fecha-confirmada">
+          <i class="bi bi-calendar-check"></i>
+          Fecha confirmada: {{ nuevaActividadFechaHoraConfirmada | date:'dd/MM/yyyy HH:mm' }}
+        </div>
       </div>
+
       <div class="campo-form">
-        <input type="datetime-local" 
-               [(ngModel)]="nuevaActividadFechaHora"
-               class="input-date">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="actividadRepetitiva">
+          <i class="bi bi-arrow-repeat"></i> Actividad repetitiva
+        </label>
       </div>
-      <button class="btn-agregar btn-actividad" (click)="agregarActividad()">
+
+      <div class="campo-form" *ngIf="actividadRepetitiva">
+        <label> Repetir cada</label>
+        <div class="repeticion-opciones">
+          <button type="button"
+                  class="btn-repeticion"
+                  [class.active]="actividadFrecuencia === 'diario'"
+                  (click)="actividadFrecuencia = 'diario'">
+            Diario
+          </button>
+          <button type="button"
+                  class="btn-repeticion"
+                  [class.active]="actividadFrecuencia === 'semanal'"
+                  (click)="actividadFrecuencia = 'semanal'">
+            Semanal
+          </button>
+          <button type="button"
+                  class="btn-repeticion"
+                  [class.active]="actividadFrecuencia === 'mensual'"
+                  (click)="actividadFrecuencia = 'mensual'">
+            Mensual
+          </button>
+        </div>
+      </div>
+
+      <div class="campo-form" *ngIf="actividadRepetitiva && actividadFrecuencia === 'semanal'">
+        <label> Días de la semana</label>
+        <div class="dias-semana">
+          <button type="button"
+                  *ngFor="let dia of diasSemanaLista; let i = index"
+                  class="btn-dia"
+                  [class.active]="actividadDiasSemana[i]"
+                  (click)="toggleDiaSemana(i)">
+            {{ dia }}
+          </button>
+        </div>
+      </div>
+
+      <div class="campo-form" *ngIf="actividadRepetitiva && actividadFrecuencia === 'mensual'">
+        <label> Día del mes</label>
+        <input type="number"
+               [(ngModel)]="actividadDiaMes"
+               min="1" max="31"
+               class="input-number"
+               placeholder="Ej: 15">
+      </div>
+
+      <button class="btn-agregar btn-actividad"
+              (click)="agregarActividad()"
+              [disabled]="!nuevaActividadNombre || !nuevaActividadFechaHoraConfirmada">
         <i class="bi bi-plus-circle"></i> Agregar Actividad
       </button>
     </div>
@@ -100,24 +165,43 @@
     <!-- Formulario Tarea -->
     <div class="formulario-card tarea-form">
       <h3><i class="bi bi-check2-circle"></i> Nueva Tarea</h3>
+      
       <div class="campo-form">
         <input type="text" 
                [(ngModel)]="nuevaTareaNombre" 
                placeholder="Ej: Lavar platos, Barrer, Limpiar..."
                class="input-text">
       </div>
+      
       <div class="campo-form">
         <input type="text" 
                [(ngModel)]="nuevaTareaDescripcion" 
                placeholder="Descripción (opcional)"
                class="input-text">
       </div>
+      
       <div class="campo-form">
         <input type="date" 
                [(ngModel)]="nuevaTareaFecha"
                class="input-date">
       </div>
-      <button class="btn-agregar btn-tarea" (click)="agregarTarea()">
+      
+      <div class="campo-form">
+        <input type="time" 
+               [(ngModel)]="nuevaTareaHora"
+               class="input-time"
+               placeholder="Hora (opcional)">
+      </div>
+      
+      <div class="campo-form">
+        <input type="number" 
+               [(ngModel)]="nuevaTareaDuracion"
+               class="input-number"
+               placeholder="Duración (minutos)"
+               min="1" max="480">
+      </div>
+      
+      <button class="btn-agregar btn-tarea" (click)="agregarTarea()" [disabled]="!nuevaTareaNombre">
         <i class="bi bi-plus-circle"></i> Agregar Tarea
       </button>
     </div>
@@ -125,6 +209,7 @@
 
   <!-- Listados de Actividades y Tareas -->
   <div class="listados-section">
+    
     <!-- Actividades -->
     <div class="listado-col">
       <div class="listado-header">
@@ -154,11 +239,11 @@
               <span class="evento-icono-grande"><i class="bi bi-calendar"></i></span>
               <strong>{{ actividad.nombre }}</strong>
             </div>
+            <div class="evento-fecha" *ngIf="actividad.fechaHora">
+              🕒 {{ actividad.fechaHora | date:'dd/MM/yyyy HH:mm' }}
+            </div>
             <div class="evento-detalle" *ngIf="actividad.descripcion">
               📝 {{ actividad.descripcion }}
-            </div>
-            <div class="evento-fecha">
-              🕒 {{ actividad.fechaHora | date:'dd/MM/yyyy HH:mm' }}
             </div>
           </div>
           <div class="evento-acciones">
@@ -174,7 +259,7 @@
           </div>
         </div>
         <div *ngIf="actividadesFiltradas.length === 0" class="mensaje-vacio">
-          <i class="bi bi-inbox"></i> No hay actividades pendientes
+          <i class="bi bi-inbox"></i> No hay actividades
         </div>
       </div>
     </div>
@@ -211,8 +296,11 @@
             <div class="evento-detalle" *ngIf="tarea.descripcion">
               📝 {{ tarea.descripcion }}
             </div>
-            <div class="evento-fecha">
+            <div class="evento-fecha" *ngIf="tarea.fecha">
               📆 {{ tarea.fecha | date:'dd/MM/yyyy' }}
+            </div>
+            <div class="evento-fecha" *ngIf="tarea.duracion_minutos">
+              ⏱️ {{ tarea.duracion_minutos }} min
             </div>
           </div>
           <div class="evento-acciones">
@@ -228,7 +316,7 @@
           </div>
         </div>
         <div *ngIf="tareasFiltradas.length === 0" class="mensaje-vacio">
-          <i class="bi bi-inbox"></i> No hay tareas pendientes
+          <i class="bi bi-inbox"></i> No hay tareas
         </div>
       </div>
     </div>

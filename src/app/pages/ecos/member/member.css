@@ -54,6 +54,46 @@
   color: #999;
 }
 
+/* Loading state */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #c4a28a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mensajes de error */
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-message i {
+  font-size: 20px;
+}
+
 /* Grid de miembros */
 .members-grid {
   display: grid;
@@ -149,7 +189,7 @@
   transform: scale(1.05);
 }
 
-/* Botón de actividades destacado */
+/* Botón de actividades */
 .action-btn.actividades {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -163,6 +203,41 @@
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
+/* Botón de gastos */
+.action-btn.gastos {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(67, 233, 123, 0.3);
+}
+
+.action-btn.gastos:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(67, 233, 123, 0.4);
+  background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%);
+}
+
+/* Botón de configuración */
+.action-btn.config {
+  background: #ffd93d;
+  color: #333;
+}
+
+.action-btn.config:hover {
+  background: #ffcd00;
+}
+
+/* Botón de editar */
+.action-btn.edit {
+  background: #4a90e2;
+  color: white;
+}
+
+.action-btn.edit:hover {
+  background: #357abd;
+}
+
+/* Botón de eliminar */
 .action-btn.delete {
   background: #fee2e2;
   color: #dc2626;
@@ -200,7 +275,7 @@
   opacity: 1;
 }
 
-/* Modales */
+/* Modales generales */
 .modal {
   position: fixed;
   top: 0;
@@ -216,23 +291,23 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
   background: white;
   border-radius: 12px;
   padding: 24px;
-  width: 400px;
+  width: 500px;
   max-width: 90%;
   max-height: 90%;
   overflow-y: auto;
   animation: slideIn 0.3s ease;
+}
+
+.modal-content.large {
+  width: 700px;
 }
 
 @keyframes slideIn {
@@ -250,6 +325,9 @@
   margin: 0 0 20px 0;
   color: #333;
   font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .modal-content p {
@@ -386,22 +464,240 @@
   font-size: 12px;
 }
 
+/* ==================== ESTILOS PARA GASTOS ==================== */
+.gastos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.gastos-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.btn-agregar-gasto {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-agregar-gasto:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 233, 123, 0.3);
+}
+
+/* Formulario de gasto */
+.formulario-gasto {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.formulario-gasto h5 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #43e97b;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
+
+.btn-submit {
+  background: #43e97b;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-submit:hover {
+  background: #2bc86a;
+  transform: translateY(-1px);
+}
+
+.btn-cancel {
+  background: #ddd;
+  color: #666;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #ccc;
+}
+
+/* Lista de gastos */
+.gastos-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.gasto-item {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.gasto-item:hover {
+  transform: translateX(5px);
+  background: #f0f0f0;
+}
+
+.gasto-info {
+  flex: 1;
+}
+
+.gasto-titulo {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.gasto-descripcion {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.gasto-valor {
+  font-weight: bold;
+  color: #43e97b;
+  font-size: 14px;
+}
+
+.gasto-fecha {
+  font-size: 11px;
+  color: #999;
+  margin-top: 5px;
+}
+
+.gasto-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-eliminar-gasto {
+  background: #fee2e2;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #dc2626;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-eliminar-gasto:hover {
+  background: #fecaca;
+  transform: scale(1.05);
+}
+
+.empty-gastos {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.empty-gastos i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+/* Loading en gastos */
+.loading-gastos {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+}
+
+.loading-gastos i {
+  animation: spin 1s linear infinite;
+}
+
+/* Badge de gastos en la tarjeta */
+.badge.gastos {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
 /* Scrollbar personalizada */
-.modal-content::-webkit-scrollbar {
+.modal-content::-webkit-scrollbar,
+.gastos-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.modal-content::-webkit-scrollbar-track {
+.modal-content::-webkit-scrollbar-track,
+.gastos-list::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
 }
 
-.modal-content::-webkit-scrollbar-thumb {
+.modal-content::-webkit-scrollbar-thumb,
+.gastos-list::-webkit-scrollbar-thumb {
   background: #c4a28a;
   border-radius: 4px;
 }
 
-.modal-content::-webkit-scrollbar-thumb:hover {
+.modal-content::-webkit-scrollbar-thumb:hover,
+.gastos-list::-webkit-scrollbar-thumb:hover {
   background: #b89573;
 }
 
@@ -439,6 +735,20 @@
     width: 95%;
     padding: 20px;
   }
+  
+  .modal-content.large {
+    width: 95%;
+  }
+  
+  .gasto-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .gasto-actions {
+    margin-top: 10px;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -461,6 +771,14 @@
   }
   
   .modal-buttons button {
+    width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions button {
     width: 100%;
   }
 }

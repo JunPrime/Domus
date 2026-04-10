@@ -1,0 +1,120 @@
+<!-- Panel de Settings -->
+<div class="settings-overlay" *ngIf="visible" (click)="cerrarSettings()"></div>
+<div class="settings-panel" [class.open]="visible">
+  <div class="settings-header">
+    <div class="header-icon">
+      <i class="bi bi-sliders2"></i>
+    </div>
+    <h2>{{ t('titulo') }}</h2>
+    <button class="btn-close" (click)="cerrarSettings()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <div class="settings-body">
+    <!-- Idioma -->
+    <div class="settings-section">
+      <div class="section-title">
+        <i class="bi bi-translate"></i>
+        <h3>{{ t('idioma') }}</h3>
+      </div>
+      <div class="idioma-buttons">
+        <button class="idioma-btn" [class.active]="idiomaActual === 'es'" (click)="cambiarIdioma('es')">
+          <span class="flag">🇪🇸</span>
+          <span>{{ t('español') }}</span>
+          <i class="bi bi-check-lg" *ngIf="idiomaActual === 'es'"></i>
+        </button>
+        <button class="idioma-btn" [class.active]="idiomaActual === 'en'" (click)="cambiarIdioma('en')">
+          <span class="flag">🇬🇧</span>
+          <span>{{ t('english') }}</span>
+          <i class="bi bi-check-lg" *ngIf="idiomaActual === 'en'"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Paleta de colores -->
+    <div class="settings-section">
+      <div class="section-title">
+        <i class="bi bi-palette-fill"></i>
+        <h3>{{ t('paletaHeader') }}</h3>
+      </div>
+      <div class="paletas-grid">
+        <div *ngFor="let paleta of paletasDisponibles" 
+             class="paleta-card" 
+             [class.active]="paletaHeader === paleta.id"
+             (click)="cambiarPaleta(paleta.id)">
+          <div class="paleta-preview">
+            <div class="color-bar" [style.background]="paleta.headerStart"></div>
+            <div class="color-bar" [style.background]="paleta.headerEnd"></div>
+            <div class="color-bar" [style.background]="paleta.footerStart"></div>
+            <div class="color-bar" [style.background]="paleta.footerEnd"></div>
+          </div>
+          <div class="paleta-info">
+            <span class="paleta-nombre">{{ paleta.nombre }}</span>
+            <i class="bi bi-check-circle-fill" *ngIf="paletaHeader === paleta.id"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fuente -->
+    <div class="settings-section">
+      <div class="section-title">
+        <i class="bi bi-fonts"></i>
+        <h3>{{ t('fuente') }}</h3>
+      </div>
+      <div class="fuentes-grid">
+        <button *ngFor="let fuente of fuentesDisponibles" 
+                class="fuente-card" 
+                [class.active]="fuenteActual === fuente.id"
+                [style.fontFamily]="fuente.css"
+                (click)="cambiarFuente(fuente.id)">
+          <span class="fuente-nombre">{{ fuente.nombre }}</span>
+          <span class="fuente-preview">Aa</span>
+          <i class="bi bi-check-lg" *ngIf="fuenteActual === fuente.id"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tamaño de texto -->
+    <div class="settings-section">
+      <div class="section-title">
+        <i class="bi bi-textarea-resize"></i>
+        <h3>{{ t('tamanioTexto') }}</h3>
+      </div>
+      <div class="tamanio-controls">
+        <div class="tamanio-slider">
+          <button class="tamanio-btn" (click)="cambiarTamanioFuente(-1)" [disabled]="tamanioFuente <= tamanioMin">
+            <i class="bi bi-dash-lg"></i>
+          </button>
+          <div class="tamanio-valor">
+            <span class="numero">{{ tamanioFuente }}</span>
+            <span class="unidad">px</span>
+          </div>
+          <button class="tamanio-btn" (click)="cambiarTamanioFuente(1)" [disabled]="tamanioFuente >= tamanioMax">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+        <div class="tamanio-preview">
+          <span class="preview-text" [style.fontSize.px]="tamanioFuente - 4">Texto pequeño</span>
+          <i class="bi bi-arrow-right-short"></i>
+          <span class="preview-text" [style.fontSize.px]="tamanioFuente">Texto normal</span>
+          <i class="bi bi-arrow-right-short"></i>
+          <span class="preview-text" [style.fontSize.px]="tamanioFuente + 4">Texto grande</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="settings-actions">
+      <button class="btn-reset" (click)="resetearConfiguraciones()">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        {{ t('reset') }}
+      </button>
+      <button class="btn-save" (click)="cerrarSettings()">
+        <i class="bi bi-check-lg"></i>
+        {{ t('guardar') }}
+      </button>
+    </div>
+  </div>
+</div>

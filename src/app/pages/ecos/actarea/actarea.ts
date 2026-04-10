@@ -45,6 +45,14 @@ export class Actarea implements OnInit {
   nuevaTareaFecha: string = '';
   nuevaTareaHora: string = '';
   nuevaTareaDuracion: number = 30;
+
+  nuevaActividadFechaHoraTemp: string = '';
+nuevaActividadFechaHoraConfirmada: Date | null = null;
+actividadRepetitiva: boolean = false;
+actividadFrecuencia: 'diario' | 'semanal' | 'mensual' = 'semanal';
+actividadDiasSemana: boolean[] = [false, false, false, false, false, false, false];
+actividadDiaMes: number = 1;
+diasSemanaLista: string[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   
   // Listas principales
   actividades: Evento[] = [];
@@ -69,7 +77,7 @@ export class Actarea implements OnInit {
   private miembroNombre: string = '';
 
   // URLs de API
-  private API_ACTIVIDADES_URL = 'https://codigo-production.up.railway.app/actividades';
+  private API_ACTIVIDADES_URL = 'https://codigo-production.up.railway.app/actividades/actividades';
   private API_TAREAS_URL = 'https://codigo-production.up.railway.app/tareas';
   private API_HOGARES_URL = 'https://codigo-production.up.railway.app/hogares/hogares';
 
@@ -105,17 +113,18 @@ export class Actarea implements OnInit {
         this.miembroNombre = miembro.nombre;
         console.log('👤 Miembro seleccionado:', this.miembroNombre, 'ID:', this.idMiembroActual);
         
-        // Obtener también el hogar actual
         this.obtenerHogarActual();
       } catch (error) {
         console.error('Error al parsear miembro:', error);
         this.error = 'No se pudo obtener el miembro seleccionado';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     } else {
       console.warn('No hay miembro seleccionado');
-      this.error = 'No hay un miembro seleccionado. Por favor selecciona un miembro primero.';
+      this.error = 'No hay un miembro seleccionado. Por favor selecciona un miembro desde la lista de miembros.';
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -131,19 +140,27 @@ export class Actarea implements OnInit {
         console.error('Error al parsear hogar:', error);
         this.error = 'No se pudo obtener el hogar actual';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     } else {
       console.warn('No hay hogar seleccionado');
       this.error = 'No hay un hogar seleccionado';
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
   async cargarDatos() {
+    this.loading = true;
+    this.error = '';
+    this.cdr.detectChanges();
+    
+    // Cargar actividades y tareas en paralelo, pero manejar errores individualmente
     await Promise.all([
       this.cargarActividades(),
       this.cargarTareas()
     ]);
+    
     this.inicializarCalendario();
     this.loading = false;
     this.cdr.detectChanges();
@@ -151,80 +168,152 @@ export class Actarea implements OnInit {
 
   // ==================== API ACTIVIDADES ====================
   
-  async cargarActividades() {
-    try {
-      const url = `${this.API_ACTIVIDADES_URL}/miembros/${this.idMiembroActual}/actividades`;
-      console.log('📡 Fetching actividades from:', url);
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-      
-      if (response.status === 401) {
-        this.redirigirLogin();
-        return;
-      }
-      
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('📊 Actividades recibidas:', data);
-      
+  // En actarea.component.ts, modifica el método cargarActividades:
+
+async cargarActividades() {
+  try {
+    const url = `${this.API_ACTIVIDADES_URL}/miembros/${this.idMiembroActual}/actividades`;
+    console.log('📡 Fetching actividades from:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
+    });
+    
+    if (response.status === 401) {
+      this.redirigirLogin();
+      return;
+    }
+    
+    if (response.status === 404) {
+      console.log('📭 No hay actividades para este miembro');
+      this.actividades = [];
+      return;
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('📊 Actividades recibidas:', data);
+    
+    if (Array.isArray(data) && data.length > 0) {
       this.actividades = data.map((act: any) => ({
         id: act.id_actividad,
-        nombre: `Actividad ${act.id_actividad}`,
+        nombre: this.nuevaActividadNombre || 'Actividad programada',
         tipo: 'actividad',
-        fechaHora: act.hora ? new Date(`2000-01-01T${act.hora}`) : undefined,
+        fechaHora: act.hora ? (() => {
+          // Crear una fecha con la hora de la actividad
+          const [hours, minutes, seconds] = act.hora.split(':');
+          const fecha = new Date();
+          fecha.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds || '0'));
+          return fecha;
+        })() : undefined,
         completada: false,
-        descripcion: `Días: ${act.dias_semana}, Duración: ${act.duracion_minutos}min`,
-        duracion_minutos: act.duracion_minutos
+        descripcion: `Días: ${act.dias_semana || 'No especificado'}, Duración: ${act.duracion_minutos || 0} min`,
+        duracion_minutos: act.duracion_minutos,
+        dias_semana: act.dias_semana
       }));
-      
-    } catch (error: any) {
-      console.error('❌ Error cargando actividades:', error);
+    } else {
       this.actividades = [];
     }
+    
+  } catch (error: any) {
+    console.error('❌ Error cargando actividades:', error);
+    this.actividades = [];
   }
+}
+confirmarFechaHoraActividad() {
+  if (this.nuevaActividadFechaHoraTemp) {
+    this.nuevaActividadFechaHoraConfirmada = new Date(this.nuevaActividadFechaHoraTemp);
+    this.error = '';
+  } else {
+    this.error = 'Selecciona una fecha y hora';
+  }
+}
+toggleDiaSemana(index: number) {
+  this.actividadDiasSemana[index] = !this.actividadDiasSemana[index];
+}
+getDiasSemanaSeleccionados(): string {
+  const dias: number[] = [];
+  this.actividadDiasSemana.forEach((seleccionado, index) => {
+    if (seleccionado) {
+      // Convertir índice a número de día (1=Lunes, 7=Domingo)
+      let diaNum = index + 1;
+      if (diaNum === 7) diaNum = 7; // Sábado = 6? Ajusta según tu backend
+      dias.push(diaNum);
+    }
+  });
+  return dias.join(',');
+}
 
   async crearActividadAPI(): Promise<boolean> {
-    try {
-      const fechaHora = new Date(this.nuevaActividadFechaHora);
-      const hora = fechaHora.toTimeString().split(' ')[0];
-      const fecha = fechaHora.toISOString().split('T')[0];
-      
-      const body = {
-        repetitiva_semanal: false,
-        hora: hora,
-        dias_semana: null,
-        duracion_minutos: 60,
-        economica: false
-      };
-      
-      const url = `${this.API_ACTIVIDADES_URL}/miembros/${this.idMiembroActual}/actividades`;
-      console.log('📡 POST actividad a:', url, body);
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(body)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error al crear actividad');
-      }
-      
-      await this.cargarActividades();
-      return true;
-    } catch (error: any) {
-      console.error('❌ Error:', error);
-      this.error = error.message;
+  try {
+    if (!this.nuevaActividadFechaHoraConfirmada) {
+      this.error = 'Confirma la fecha y hora primero';
       return false;
     }
+    
+    const fecha = this.nuevaActividadFechaHoraConfirmada;
+    const hora = fecha.toTimeString().split(' ')[0];
+    
+    // Calcular días de semana según frecuencia
+    let diasSemanaStr: string | null = null;
+    if (this.actividadRepetitiva && this.actividadFrecuencia === 'semanal') {
+      diasSemanaStr = this.getDiasSemanaSeleccionados();
+      if (!diasSemanaStr) {
+        this.error = 'Selecciona al menos un día de la semana';
+        return false;
+      }
+    }
+     const body: any = {
+      repetitiva_semanal: this.actividadRepetitiva && this.actividadFrecuencia === 'semanal',
+      hora: hora,
+      dias_semana: diasSemanaStr,
+      
+      duracion_minutos: 60,
+      economica: false
+    };
+
+    if (this.actividadRepetitiva && this.actividadFrecuencia === 'mensual') {
+      body.dias_semana = this.actividadDiaMes.toString();
+    }
+    const url = `https://codigo-production.up.railway.app/actividades/actividades/miembros/${this.idMiembroActual}/actividades`;
+    console.log('📡 POST actividad a:', url);
+    console.log('📦 Body:', body);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(body)
+    });
+    
+    if (response.status === 401) {
+      this.redirigirLogin();
+      return false;
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Error response:', errorData);
+      throw new Error(errorData.detail || 'Error al crear actividad');
+    }
+    
+    const newActividad = await response.json();
+    console.log('✅ Actividad creada:', newActividad);
+    
+    // Limpiar formulario
+    this.limpiarFormularioActividad();
+    await this.cargarActividades();
+    return true;
+    
+  } catch (error: any) {
+    console.error('❌ Error:', error);
+    this.error = error.message || 'Error al crear actividad';
+    return false;
   }
+}
 
   async eliminarActividadAPI(id: number): Promise<boolean> {
     try {
@@ -235,6 +324,11 @@ export class Actarea implements OnInit {
         method: 'DELETE',
         headers: this.getAuthHeaders()
       });
+      
+      if (response.status === 401) {
+        this.redirigirLogin();
+        return false;
+      }
       
       if (response.status === 204 || response.status === 200) {
         await this.cargarActividades();
@@ -264,6 +358,12 @@ export class Actarea implements OnInit {
         return;
       }
       
+      if (response.status === 404) {
+        console.log('📭 No hay tareas para este hogar (404)');
+        this.tareas = [];
+        return;
+      }
+      
       if (!response.ok) {
         throw new Error(`Error ${response.status}`);
       }
@@ -271,16 +371,20 @@ export class Actarea implements OnInit {
       const data = await response.json();
       console.log('📊 Tareas recibidas:', data);
       
-      this.tareas = data.map((tarea: any) => ({
-        id: tarea.id_tarea,
-        nombre: tarea.nombre,
-        tipo: 'tarea',
-        descripcion: tarea.descripcion,
-        fecha: tarea.fecha ? new Date(tarea.fecha) : undefined,
-        completada: tarea.realizada || false,
-        id_miembro_f: tarea.id_miembro_f,
-        duracion_minutos: tarea.duracion_minutos
-      }));
+      if (Array.isArray(data) && data.length > 0) {
+        this.tareas = data.map((tarea: any) => ({
+          id: tarea.id_tarea,
+          nombre: tarea.nombre,
+          tipo: 'tarea',
+          descripcion: tarea.descripcion,
+          fecha: tarea.fecha ? new Date(tarea.fecha) : undefined,
+          completada: tarea.realizada || false,
+          id_miembro_f: tarea.id_miembro_f,
+          duracion_minutos: tarea.duracion_minutos
+        }));
+      } else {
+        this.tareas = [];
+      }
       
     } catch (error: any) {
       console.error('❌ Error cargando tareas:', error);
@@ -314,14 +418,19 @@ export class Actarea implements OnInit {
         body: JSON.stringify(body)
       });
       
+      if (response.status === 401) {
+        this.redirigirLogin();
+        return false;
+      }
+      
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || 'Error al crear tarea');
       }
       
       const newTarea = await response.json();
       
-      // Si hay miembro asignado, asignar la tarea
+      // Asignar la tarea al miembro actual
       if (this.idMiembroActual && newTarea.id_tarea) {
         await this.asignarTarea(newTarea.id_tarea);
       }
@@ -352,8 +461,12 @@ export class Actarea implements OnInit {
         body: JSON.stringify(body)
       });
       
+      if (response.status === 401) {
+        this.redirigirLogin();
+      }
+      
       if (!response.ok) {
-        console.error('Error asignando tarea:', await response.json());
+        console.error('Error asignando tarea:', await response.json().catch(() => ({})));
       }
     } catch (error) {
       console.error('Error asignando tarea:', error);
@@ -369,6 +482,11 @@ export class Actarea implements OnInit {
         method: 'PUT',
         headers: this.getAuthHeaders()
       });
+      
+      if (response.status === 401) {
+        this.redirigirLogin();
+        return false;
+      }
       
       if (response.ok) {
         await this.cargarTareas();
@@ -390,6 +508,11 @@ export class Actarea implements OnInit {
         method: 'DELETE',
         headers: this.getAuthHeaders()
       });
+      
+      if (response.status === 401) {
+        this.redirigirLogin();
+        return false;
+      }
       
       if (response.status === 204 || response.status === 200) {
         await this.cargarTareas();
@@ -493,29 +616,31 @@ export class Actarea implements OnInit {
   // ==================== MÉTODOS PARA ACTIVIDADES ====================
   
   async agregarActividad() {
-    if (this.actualizando) return;
-    this.actualizando = true;
-    
-    if (!this.nuevaActividadNombre || !this.nuevaActividadFechaHora) {
-      this.error = 'Completa todos los campos obligatorios';
-      this.actualizando = false;
-      return;
-    }
-    
-    const success = await this.crearActividadAPI();
-    if (success) {
-      this.limpiarFormularioActividad();
-      this.generarDiasCalendario();
-      this.cdr.detectChanges();
-    }
-    
+  if (this.actualizando) return;
+  this.actualizando = true;
+  
+  // ✅ Usar nuevaActividadFechaHoraConfirmada en lugar de nuevaActividadFechaHora
+  if (!this.nuevaActividadNombre || !this.nuevaActividadFechaHoraConfirmada) {
+    this.error = 'Completa todos los campos obligatorios y confirma la fecha';
     this.actualizando = false;
+    setTimeout(() => this.error = '', 3000);
+    return;
   }
+  
+  const success = await this.crearActividadAPI();
+  if (success) {
+    this.limpiarFormularioActividad();
+    this.generarDiasCalendario();
+    this.cdr.detectChanges();
+  }
+  
+  this.actualizando = false;
+}
 
   async completarActividad(actividad: Evento) {
-    // Las actividades no tienen endpoint de completar por ahora
     actividad.completada = true;
     this.generarDiasCalendario();
+    this.cdr.detectChanges();
   }
 
   async eliminarActividad(actividad: Evento) {
@@ -537,6 +662,7 @@ export class Actarea implements OnInit {
     if (!this.nuevaTareaNombre) {
       this.error = 'El nombre de la tarea es obligatorio';
       this.actualizando = false;
+      setTimeout(() => this.error = '', 3000);
       return;
     }
     
@@ -615,11 +741,16 @@ export class Actarea implements OnInit {
   }
 
   limpiarFormularioActividad() {
-    this.nuevaActividadNombre = '';
-    this.nuevaActividadDescripcion = '';
-    this.nuevaActividadFechaHora = '';
-    this.error = '';
-  }
+  this.nuevaActividadNombre = '';
+  this.nuevaActividadDescripcion = '';
+  this.nuevaActividadFechaHoraTemp = '';
+  this.nuevaActividadFechaHoraConfirmada = null;
+  this.actividadRepetitiva = false;
+  this.actividadFrecuencia = 'semanal';
+  this.actividadDiasSemana = [false, false, false, false, false, false, false];
+  this.actividadDiaMes = 1;
+  this.error = '';
+}
 
   limpiarFormularioTarea() {
     this.nuevaTareaNombre = '';
@@ -633,6 +764,7 @@ export class Actarea implements OnInit {
   redirigirLogin() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('usuario');
+    sessionStorage.removeItem('miembroSeleccionado');
     this.router.navigate(['/login']);
   }
 }

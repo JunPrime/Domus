@@ -41,24 +41,44 @@
       </div>
 
       <div class="actions">
-        <button class="action-btn" (click)="navegarAActividades(m)" title="Ver Actividades y Tareas"><i class="bi bi-pin-angle"></i></button>
-        <button class="action-btn" (click)="verDetalles(m)" title="Ver detalles"><i class="bi bi-patch-plus"></i></button>
-        <button class="action-btn" (click)="toggleActivo(m)" title="Cambiar estado"><i class="bi bi-indent"></i></button>
-        <button class="action-btn" (click)="abrirModalConfiguracion(m)" title="Configuración"><i class="bi bi-nut"></i></button>
-        <button class="action-btn" (click)="abrirModalEditar(m)" title="Editar"><i class="bi bi-pencil-fill"></i></button>
-        <button class="action-btn delete" (click)="abrirModalEliminar(m)" title="Eliminar"><i class="bi bi-trash"></i></button>
+        <!-- Botón Ver Gastos -->
+        <button class="action-btn gastos" (click)="abrirModalGastos(m)" title="Ver Gastos">
+          <i class="bi bi-wallet2"></i>
+        </button>
+        
+        <!-- Botón Ver detalles -->
+        <button class="action-btn" (click)="verDetalles(m)" title="Ver detalles">
+          <i class="bi bi-patch-plus"></i>
+        </button>
+        
+        <!-- Botón Cambiar estado -->
+        <button class="action-btn" (click)="toggleActivo(m)" title="Cambiar estado">
+          <i class="bi bi-indent"></i>
+        </button>
+        
+        <!-- Botón Configuración -->
+        <button class="action-btn" (click)="abrirModalConfiguracion(m)" title="Configuración">
+          <i class="bi bi-nut"></i>
+        </button>
+        
+        <!-- Botón Editar -->
+        <button class="action-btn" (click)="abrirModalEditar(m)" title="Editar">
+          <i class="bi bi-pencil-fill"></i>
+        </button>
+        
+        <!-- Botón Eliminar -->
+        <button class="action-btn delete" (click)="abrirModalEliminar(m)" title="Eliminar">
+          <i class="bi bi-trash"></i>
+        </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Resto de modales igual que antes... -->
-
-
 <!-- Modal de Detalles -->
 <div class="modal" *ngIf="modalDetallesVisible" (click)="cerrarDetalles()">
   <div class="modal-content" (click)="$event.stopPropagation()">
-    <h3> Detalles del Miembro</h3>
+    <h3>📋 Detalles del Miembro</h3>
     <p><strong>ID:</strong> {{ miembroSeleccionado?.id_miembro }}</p>
     <p><strong>Nombre:</strong> {{ miembroSeleccionado?.nombre }}</p>
     <p><strong>Rol:</strong> {{ getRolTexto(miembroSeleccionado?.es_admin || false) }}</p>
@@ -107,6 +127,8 @@
     <label><input type="checkbox" [(ngModel)]="configEditando.crear_actividad"> Puede crear actividades</label>
     <label><input type="checkbox" [(ngModel)]="configEditando.crear_tarea"> Puede crear tareas</label>
     <label><input type="checkbox" [(ngModel)]="configEditando.administrar_miembros"> Puede administrar miembros</label>
+    <label><input type="checkbox" [(ngModel)]="configEditando.ver_gastos"> Puede ver gastos</label>
+    <label><input type="checkbox" [(ngModel)]="configEditando.crear_gastos"> Puede crear gastos</label>
     <div class="modal-buttons">
       <button class="btn-guardar" (click)="guardarConfiguracion()">Guardar</button>
       <button class="btn-cancelar" (click)="modalConfigVisible = false">Cancelar</button>
@@ -114,7 +136,6 @@
   </div>
 </div>
 
-<!-- Modal de Eliminar -->
 <!-- Modal de Eliminar -->
 <div class="modal" *ngIf="modalEliminarVisible" (click)="cerrarModalEliminar()">
   <div class="modal-content" (click)="$event.stopPropagation()">
@@ -125,6 +146,87 @@
     <div class="modal-buttons">
       <button class="btn-eliminar" (click)="eliminarMiembro(miembroEditando.id_miembro!)">Sí, eliminar</button>
       <button class="btn-cancelar" (click)="cerrarModalEliminar()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Gastos -->
+<div class="modal" *ngIf="modalGastosVisible" (click)="cerrarModalGastos()">
+  <div class="modal-content large" (click)="$event.stopPropagation()">
+    <h3>
+      <i class="bi bi-wallet2"></i>
+      Gastos de {{ miembroSeleccionado?.nombre }}
+    </h3>
+    
+    <div class="gastos-header">
+      <h4><i class="bi bi-receipt"></i> Lista de Gastos</h4>
+      <button class="btn-agregar-gasto" (click)="mostrarFormularioGasto = !mostrarFormularioGasto">
+        <i class="bi bi-plus-circle"></i>
+        {{ mostrarFormularioGasto ? 'Cancelar' : 'Agregar Gasto' }}
+      </button>
+    </div>
+    
+    <!-- Formulario para agregar gasto -->
+    <div class="formulario-gasto" *ngIf="mostrarFormularioGasto">
+      <h5><i class="bi bi-plus-circle"></i> Nuevo Gasto</h5>
+      <div class="form-group">
+        <label>Título</label>
+        <input type="text" [(ngModel)]="nuevoGasto.titulo" placeholder="Ej: Supermercado" class="input-full">
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="nuevoGasto.descripcion" placeholder="Descripción del gasto" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Valor</label>
+        <input type="number" [(ngModel)]="nuevoGasto.valor_aproximado" placeholder="0" class="input-full">
+      </div>
+      <div class="form-actions">
+        <button class="btn-submit" (click)="registrarGasto()" [disabled]="loadingGastos">
+          <i class="bi bi-check-lg"></i> Guardar Gasto
+        </button>
+        <button class="btn-cancel" (click)="mostrarFormularioGasto = false">
+          <i class="bi bi-x-lg"></i> Cancelar
+        </button>
+      </div>
+    </div>
+    
+    <!-- Lista de gastos -->
+    <div class="gastos-list" *ngIf="!loadingGastos; else loadingGastosTemplate">
+      <div *ngFor="let gasto of gastosMiembro" class="gasto-item">
+        <div class="gasto-info">
+          <div class="gasto-titulo">{{ gasto.titulo }}</div>
+          <div class="gasto-descripcion" *ngIf="gasto.descripcion">{{ gasto.descripcion }}</div>
+          <div class="gasto-valor">{{ formatearMoneda(gasto.valor_aproximado) }}</div>
+          <div class="gasto-fecha" *ngIf="gasto.fecha">
+            <i class="bi bi-calendar3"></i> {{ gasto.fecha | date:'dd/MM/yyyy' }}
+          </div>
+        </div>
+        <div class="gasto-actions">
+          <button class="btn-eliminar-gasto" (click)="eliminarGasto(gasto.id_gasto!)" title="Eliminar gasto">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div *ngIf="gastosMiembro.length === 0" class="empty-gastos">
+        <i class="bi bi-inbox"></i>
+        <p>No hay gastos registrados para este miembro</p>
+        <small>Haz clic en "Agregar Gasto" para registrar uno</small>
+      </div>
+    </div>
+    
+    <ng-template #loadingGastosTemplate>
+      <div class="loading-gastos">
+        <i class="bi bi-hourglass-split"></i>
+        <p>Cargando gastos...</p>
+      </div>
+    </ng-template>
+    
+    <div class="modal-buttons">
+      <button class="btn-cerrar" (click)="cerrarModalGastos()">
+        <i class="bi bi-x-lg"></i> Cerrar
+      </button>
     </div>
   </div>
 </div>

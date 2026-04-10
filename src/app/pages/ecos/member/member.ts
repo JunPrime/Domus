@@ -17,7 +17,16 @@ interface ConfiguracionMiembro {
   crear_actividad: boolean;
   crear_tarea: boolean;
   administrar_miembros: boolean;
-  id_miembro_f?: number;
+  ver_gastos?: boolean;
+  crear_gastos?: boolean;
+}
+
+export interface Gasto {
+  id_gasto?: number;
+  titulo: string;
+  descripcion: string;
+  valor_aproximado: number;
+  fecha?: string;
 }
 
 @Component({
@@ -31,9 +40,11 @@ export class MemberComponent implements OnInit {
   miembros: Miembro[] = [];
   loading: boolean = true;
   error: string = '';
+  success: string = ''; // ✅ Agregar propiedad success
   private isBrowser: boolean;
   private API_BASE_URL = 'https://codigo-production.up.railway.app/miembros';
   private HOGARES_API_URL = 'https://codigo-production.up.railway.app/hogares/hogares';
+  private GASTOS_API_URL = 'https://codigo-production.up.railway.app/gastos';
   
   // Variables para modales
   modalEditarVisible = false;
@@ -41,6 +52,7 @@ export class MemberComponent implements OnInit {
   modalEliminarVisible = false;
   modalAgregarVisible = false;
   modalDetallesVisible = false;
+  modalGastosVisible = false;
   
   // Variables para formularios
   miembroEditando: Miembro = {
@@ -61,12 +73,24 @@ export class MemberComponent implements OnInit {
   configEditando: ConfiguracionMiembro = {
     crear_actividad: false,
     crear_tarea: false,
-    administrar_miembros: false
+    administrar_miembros: false,
+    ver_gastos: true,
+    crear_gastos: false
   };
   
   miembroSeleccionado: Miembro | null = null;
   idMiembroActual = 0;
   idHogarActual: number = 0;
+  
+  // Variables para gastos
+  gastosMiembro: Gasto[] = [];
+  loadingGastos: boolean = false;
+  nuevoGasto: Gasto = {
+    titulo: '',
+    descripcion: '',
+    valor_aproximado: 0
+  };
+  mostrarFormularioGasto: boolean = false;
   
   // Bandera para evitar ejecuciones múltiples
   private actualizando: boolean = false;
@@ -86,7 +110,7 @@ export class MemberComponent implements OnInit {
     }
   }
 
-  private getAuthHeaders(): HeadersInit {
+  private getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('access_token');
     const tokenType = localStorage.getItem('token_type') || 'bearer';
     return {
@@ -118,7 +142,6 @@ export class MemberComponent implements OnInit {
   }
 
   async cargarMiembros() {
-    // Evitar múltiples cargas simultáneas
     if (this.cargandoMiembros) return;
     this.cargandoMiembros = true;
     
@@ -166,7 +189,6 @@ export class MemberComponent implements OnInit {
       const data = await response.json();
       console.log('📊 Miembros recibidos (raw):', data);
       
-      // Filtrar miembros que no sean válidos o sean datos de prueba
       let miembrosValidos: Miembro[] = [];
       
       if (Array.isArray(data)) {
@@ -205,6 +227,185 @@ export class MemberComponent implements OnInit {
     }
   }
 
+  // ==================== GASTOS DEL MIEMBRO ====================
+  async abrirModalGastos(miembro: Miembro) {
+    this.miembroSeleccionado = miembro;
+    this.idMiembroActual = miembro.id_miembro || 0;
+    this.modalGastosVisible = true;
+    this.gastosMiembro = [];
+    this.nuevoGasto = { titulo: '', descripcion: '', valor_aproximado: 0 };
+    this.mostrarFormularioGasto = false;
+    await this.cargarGastosMiembro();
+  }
+
+  async cargarGastosMiembro() {
+    if (!this.idMiembroActual) return;
+    
+    this.loadingGastos = true;
+    
+    try {
+      const url = `${this.GASTOS_API_URL}/gastos/miembros/${this.idMiembroActual}/gastos`;
+      console.log('📡 GET gastos desde:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      if (response.status === 401) {
+        this.error = 'Sesión expirada';
+        return;
+      }
+      
+      if (response.status === 404) {
+        this.gastosMiembro = [];
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (Array.isArray(data)) {
+        this.gastosMiembro = data;
+      } else if (data && data.gastos) {
+        this.gastosMiembro = data.gastos;
+      } else {
+        this.gastosMiembro = [];
+      }
+      
+      console.log('📊 Gastos cargados:', this.gastosMiembro.length);
+      
+    } catch (error: any) {
+      console.error('❌ Error cargando gastos:', error);
+      this.gastosMiembro = [];
+    } finally {
+      this.loadingGastos = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async registrarGasto() {
+    // Validaciones
+    if (!this.nuevoGasto.titulo || this.nuevoGasto.titulo.trim() === '') {
+      this.error = 'El título del gasto es obligatorio';
+      setTimeout(() => this.error = '', 3000);
+      return;
+    }
+
+    if (!this.nuevoGasto.valor_aproximado || this.nuevoGasto.valor_aproximado <= 0) {
+      this.error = 'El valor del gasto debe ser mayor a 0';
+      setTimeout(() => this.error = '', 3000);
+      return;
+    }
+
+    this.loadingGastos = true;
+
+    try {
+      const url = `${this.GASTOS_API_URL}/gastos/miembros/${this.idMiembroActual}/gastos`;
+      
+      const valorNumerico = Number(this.nuevoGasto.valor_aproximado);
+      if (isNaN(valorNumerico) || valorNumerico <= 0) {
+        this.error = 'El valor debe ser un número válido';
+        return;
+      }
+      
+      const body = {
+        titulo: this.nuevoGasto.titulo.trim().substring(0, 50),
+        descripcion: this.nuevoGasto.descripcion?.trim().substring(0, 250) || '',
+        valor_aproximado: valorNumerico
+      };
+      
+      console.log('📡 POST a:', url);
+      console.log('📦 Body enviado:', JSON.stringify(body, null, 2));
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(body)
+      });
+      
+      console.log('📥 Response status:', response.status);
+      
+      if (response.status === 401) {
+        this.error = 'Sesión expirada. Por favor inicia sesión nuevamente.';
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('usuario');
+        setTimeout(() => this.router.navigate(['/login']), 2000);
+        return;
+      }
+      
+      if (response.status === 403) {
+        this.error = 'No tienes permiso para registrar gastos para este miembro';
+        return;
+      }
+      
+      if (response.status === 404) {
+        this.error = 'El miembro no existe';
+        return;
+      }
+      
+      if (!response.ok) {
+        const responseText = await response.text();
+        throw new Error(`Error ${response.status}: ${responseText}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Gasto registrado:', result);
+      
+      this.nuevoGasto = { titulo: '', descripcion: '', valor_aproximado: 0 };
+      this.mostrarFormularioGasto = false;
+      await this.cargarGastosMiembro();
+      this.error = '';
+      this.success = 'Gasto registrado exitosamente';
+      setTimeout(() => this.success = '', 3000);
+      
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      this.error = error.message || 'Error al registrar el gasto';
+    } finally {
+      this.loadingGastos = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async eliminarGasto(idGasto: number) {
+    if (!confirm('¿Estás seguro de eliminar este gasto?')) return;
+    
+    try {
+      const url = `${this.GASTOS_API_URL}/gastos/${idGasto}`;
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      if (response.ok) {
+        await this.cargarGastosMiembro();
+      }
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      this.error = error.message || 'Error al eliminar el gasto';
+    }
+  }
+
+  formatearMoneda(valor: number): string {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(valor);
+  }
+
+  cerrarModalGastos() {
+    this.modalGastosVisible = false;
+    this.miembroSeleccionado = null;
+    this.gastosMiembro = [];
+  }
+
+  // ==================== CRUD MIEMBROS ====================
   verDetalles(miembro: Miembro) {
     this.miembroSeleccionado = miembro;
     this.modalDetallesVisible = true;
@@ -214,17 +415,19 @@ export class MemberComponent implements OnInit {
     this.modalDetallesVisible = false;
     this.miembroSeleccionado = null;
   }
+
   cerrarModalEliminar() {
-  this.modalEliminarVisible = false;
-  this.miembroEditando = {
-    id_miembro: 0,
-    nombre: '',
-    es_admin: false,
-    preferencias_alimenticias: null,
-    activo: true
-  };
-  this.error = '';
-}
+    this.modalEliminarVisible = false;
+    this.miembroEditando = {
+      id_miembro: 0,
+      nombre: '',
+      es_admin: false,
+      preferencias_alimenticias: null,
+      activo: true
+    };
+    this.error = '';
+  }
+
   abrirModalAgregar() {
     this.nuevoMiembro = {
       nombre: '',
@@ -342,13 +545,17 @@ export class MemberComponent implements OnInit {
         this.configEditando = {
           crear_actividad: config.crear_actividad,
           crear_tarea: config.crear_tarea,
-          administrar_miembros: config.administrar_miembros
+          administrar_miembros: config.administrar_miembros,
+          ver_gastos: true,
+          crear_gastos: config.crear_gastos || false
         };
       } else {
         this.configEditando = {
           crear_actividad: false,
           crear_tarea: false,
-          administrar_miembros: miembro.es_admin
+          administrar_miembros: miembro.es_admin,
+          ver_gastos: true,
+          crear_gastos: false
         };
       }
     } catch (error) {
@@ -356,7 +563,9 @@ export class MemberComponent implements OnInit {
       this.configEditando = {
         crear_actividad: false,
         crear_tarea: false,
-        administrar_miembros: miembro.es_admin
+        administrar_miembros: miembro.es_admin,
+        ver_gastos: true,
+        crear_gastos: false
       };
     }
     
@@ -377,7 +586,8 @@ export class MemberComponent implements OnInit {
         body: JSON.stringify({
           crear_actividad: this.configEditando.crear_actividad,
           crear_tarea: this.configEditando.crear_tarea,
-          administrar_miembros: this.configEditando.administrar_miembros
+          administrar_miembros: this.configEditando.administrar_miembros,
+          crear_gastos: this.configEditando.crear_gastos
         })
       });
       
@@ -396,86 +606,46 @@ export class MemberComponent implements OnInit {
   }
 
   abrirModalEliminar(miembro: Miembro) {
-  this.miembroEditando = { ...miembro };
-  this.modalEliminarVisible = true;
-  this.error = ''; // Limpiar errores previos
-}
+    this.miembroEditando = { ...miembro };
+    this.modalEliminarVisible = true;
+    this.error = '';
+  }
 
   async eliminarMiembro(id: number) {
-  if (this.actualizando) return;
-  this.actualizando = true;
-  
-  try {
-    // Opción 1: Con doble "miembros"
-    const url = `https://codigo-production.up.railway.app/miembros/miembros/${id}`;
-    console.log('📡 DELETE a:', url);
+    if (this.actualizando) return;
+    this.actualizando = true;
     
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: this.getAuthHeaders()
-    });
-    
-    console.log('📥 Response status:', response.status);
-    
-    if (response.status === 204 || response.status === 200) {
-      this.modalEliminarVisible = false;
-      this.miembroEditando = {
-        id_miembro: 0,
-        nombre: '',
-        es_admin: false,
-        preferencias_alimenticias: null,
-        activo: true
-      };
-      this.cdr.detectChanges();
-      await this.cargarMiembros();
-      console.log('✅ Miembro eliminado correctamente');
-    } else {
-      // Si falla, probar la otra opción
-      console.log('⚠️ Probando URL alternativa...');
-      await this.probarEliminarAlternativo(id);
+    try {
+      const url = `${this.API_BASE_URL}/miembros/${id}`;
+      console.log('📡 DELETE a:', url);
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      console.log('📥 Response status:', response.status);
+      
+      if (response.status === 204 || response.status === 200) {
+        this.modalEliminarVisible = false;
+        this.miembroEditando = {
+          id_miembro: 0,
+          nombre: '',
+          es_admin: false,
+          preferencias_alimenticias: null,
+          activo: true
+        };
+        this.cdr.detectChanges();
+        await this.cargarMiembros();
+        console.log('✅ Miembro eliminado correctamente');
+      }
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      this.error = error.message || 'Error al eliminar miembro';
+    } finally {
+      this.actualizando = false;
     }
-  } catch (error: any) {
-    console.error('❌ Error:', error);
-    this.error = error.message || 'Error al eliminar miembro';
-  } finally {
-    this.actualizando = false;
   }
-}
-
-// Método alternativo para probar
-async probarEliminarAlternativo(id: number) {
-  try {
-    // Opción 2: Sin doble "miembros"
-    const url = `https://codigo-production.up.railway.app/miembros/${id}`;
-    console.log('📡 DELETE alternativo a:', url);
-    
-    const response = await fetch(url, {
-      method: 'DELETE',
-      headers: this.getAuthHeaders()
-    });
-    
-    console.log('📥 Response status alternativo:', response.status);
-    
-    if (response.status === 204 || response.status === 200) {
-      this.modalEliminarVisible = false;
-      this.miembroEditando = {
-        id_miembro: 0,
-        nombre: '',
-        es_admin: false,
-        preferencias_alimenticias: null,
-        activo: true
-      };
-      this.cdr.detectChanges();
-      await this.cargarMiembros();
-      console.log('✅ Miembro eliminado correctamente (URL alternativa)');
-    } else {
-      throw new Error(`Error ${response.status}`);
-    }
-  } catch (error: any) {
-    console.error('❌ Error en URL alternativa:', error);
-    this.error = 'No se pudo eliminar el miembro. Verifica la URL del endpoint.';
-  }
-}
 
   toggleActivo(miembro: Miembro) {
     if (this.actualizando) return;

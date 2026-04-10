@@ -122,7 +122,7 @@ body {
 }
 
 .brand-text {
-  background-color: #000;
+ background-color: #000;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -429,6 +429,7 @@ body {
   background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
   border-top: 5px solid #80c2ff;
 }
+
 
 .tarea-form {
   background: linear-gradient(135deg, #fff3ad 0%, #ffcab2 100%);
@@ -830,110 +831,14 @@ body {
   opacity: 0.6;
   cursor: not-allowed;
 }
+.listado-col:first-child {
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%);
+}
+
+
+.listado-col:last-child {
+  background: linear-gradient(135deg, #e6f2ff 0%, #cce4ff 100%);
+}
 .calendario-section {
-  background: #f1e3fa; 
-  border-radius: 20px;
-  padding: 20px;
-  transition: all 0.5s ease;
-  box-shadow: 0 4px 12px var(--sombra-suave);
-}
-.listado-col:first-child {
-  background: #f8dfb9;  /* Naranja muy clarito */
-   border-left: 4px solid #f8c276;
-  border-radius: 20px;
-  padding: 20px; /* Ajusta si ya tiene padding */
-}
-
-.listado-col:last-child {
-  background: #aad1fa;  /* Azul muy clarito */
-  border-left: 4px solid #91bdfa;
-  border-radius: 20px;
-  padding: 20px;
-}
-/* ==================== SEPARACIÓN ACTIVIDADES (NARANJA) vs TAREAS (AZUL) ==================== */
-
-/* ---- Formulario de Actividad (naranja) ---- */
-.actividad-form {
-  background: #fff5e6;  /* Fondo naranja muy claro */
-  border-top: 5px solid #ffb347;
-  border-radius: 20px;
-}
-
-.actividad-form h3 i {
-  color: #ffa559;
-}
-
-.btn-actividad {
-  background-color: #ffd9a5;
-  color: #000;
-  border: none;
-  transition: all 0.3s;
-}
-.btn-actividad:hover {
-  background-color: #ffc078;
-  transform: translateY(-2px);
-}
-
-/* ---- Formulario de Tarea (azul) ---- */
-.tarea-form {
-  background: #e6f2ff;  /* Fondo azul muy claro */
-  border-top: 5px solid #5a9eff;
-  border-radius: 20px;
-}
-
-.tarea-form h3 i {
-  color: #5a9eff;
-}
-
-.btn-tarea {
-  background-color: #b8d9ff;
-  color: #000;
-  border: none;
-}
-.btn-tarea:hover {
-  background-color: #8fc1ff;
-  transform: translateY(-2px);
-}
-
-/* ---- Columnas de listados (actividades naranja, tareas azul) ---- */
-/* Primera columna: Actividades */
-.listado-col:first-child {
-  background-color: #fff5e6;  /* naranja clarito */
-  border-radius: 20px;
-  padding: 20px;
-}
-
-/* Segunda columna: Tareas */
-.listado-col:last-child {
-  background-color: #e6f2ff;  /* azul clarito */
-  border-radius: 20px;
-  padding: 20px;
-}
-
-/* Opcional: bordes laterales para reforzar */
-.listado-col:first-child {
-  border-left: 4px solid #ffb347;
-}
-.listado-col:last-child {
-  border-left: 4px solid #5a9eff;
-}
-
-/* ---- Tarjetas internas de eventos (opcional, mejora el contraste) ---- */
-.listado-col:first-child .evento-card {
-  background: #ffffffcc;  /* blanco semi-transparente para no tapar el fondo naranja */
-  backdrop-filter: blur(2px);
-}
-.listado-col:last-child .evento-card {
-  background: #ffffffcc;
-  backdrop-filter: blur(2px);
-}
-
-/* ---- Botones de filtro dentro de cada columna (para que combinen) ---- */
-.listado-col:first-child .filtro-btn.active {
-  background: #ffb347;
-  color: white;
-}
-.listado-col:last-child .filtro-btn.active {
-  background: #5a9eff;
-  color: white;
+  background: #c5d2fc;
 }
