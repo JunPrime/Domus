@@ -1,117 +1,154 @@
-:host {
-  --primary-gradient: linear-gradient(135deg, #cce5ff, #ffe5ec);
-  --card-bg: #fff;
-  --accent-color: #cce5ff;
-  --highlight-color: #ffe5ec;
-  --dark-border: #444;
-}
-
+/* Contenedor principal */
 .auth-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  background: var(--primary-gradient);
-  padding: 40px 20px;
+  padding: 20px;
+  background: #ffffff;
 }
 
+/* Header */
 .auth-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--dark-border);
+  text-align: center;
   margin-bottom: 30px;
+  animation: fadeInDown 0.6s ease;
 }
 
 .auth-header i {
-  font-size: 2rem;
-  color: var(--dark-border);
+  font-size: 4rem;
+  color: #3d8b6e;
+  background: #f5f7f5;
+  padding: 20px;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
+.auth-header h1 {
+  font-size: 1.8rem;
+  color: #2c5f4e;
+  margin-top: 15px;
+}
+
+/* Tarjeta */
 .auth-card {
-  background: var(--card-bg);
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
   width: 100%;
-  max-width: 400px;
-  border: 2px solid var(--dark-border);
+  max-width: 450px;
+  animation: slideUp 0.5s ease;
 }
 
+/* Títulos */
 .auth-title {
+  color: #2c5f4e;
+  font-size: 1.8rem;
   text-align: center;
-  margin-bottom: 10px;
-  color: var(--dark-border);
-  font-size: 1.6rem;
 }
 
 .auth-subtitle {
+  color: #8faa8a;
   text-align: center;
-  margin-bottom: 20px;
-  color: #666;
+  margin-bottom: 30px;
 }
 
+/* Error */
 .error-message {
-  background: var(--highlight-color);
-  color: #c00;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  text-align: center;
-  font-weight: bold;
+  background: #ffe5e5;
+  border-left: 4px solid #fbbfbf;
+  color: #c97b7b;
+  padding: 12px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  animation: shake 0.3s ease;
 }
 
+/* Formulario */
 .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 20px;
 }
 
 label {
-  display: block;
-  margin-bottom: 8px;
-  color: #555;
-  font-weight: 500;
+  font-weight: 600;
+  color: #8faa8a;
+  font-size: 0.85rem;
 }
 
 input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: var(--accent-color);
-  transition: border 0.2s, box-shadow 0.2s;
+  padding: 12px 15px;
+  border: 2px solid #e8f0e6;
+  border-radius: 14px;
+  background: #fefef8;
+  transition: all 0.3s ease;
 }
 
 input:focus {
-  border: 1px solid var(--highlight-color);
   outline: none;
-  box-shadow: 0 0 6px var(--highlight-color);
+  border-color: #c5e0d4;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(165, 210, 175, 0.15);
 }
 
+/* Botón */
 .auth-btn {
   width: 100%;
   padding: 14px;
+  background: linear-gradient(135deg, #c5e0d4, #b5d3b0);
+  color: #4a6b5d;
   border: none;
-  border-radius: 10px;
-  background: var(--highlight-color);
-  color: var(--dark-border);
-  font-weight: bold;
+  border-radius: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  transition: all 0.3s ease;
 }
 
 .auth-btn:hover {
-  background: var(--accent-color);
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(165, 210, 175, 0.4);
 }
 
+/* Footer */
 .auth-footer {
   text-align: center;
-  margin-top: 20px;
-  color: #666;
+  margin-top: 25px;
+  color: #b5c4b1;
 }
 
 .auth-footer a {
-  color: var(--dark-border);
-  text-decoration: none;
-  font-weight: bold;
+  color: #8faa8a;
+  font-weight: 600;
+}
+
+/* Animaciones */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }

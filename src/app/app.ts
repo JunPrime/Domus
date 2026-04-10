@@ -1,4 +1,5 @@
-import { Component, signal, ViewChild, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
+// app.ts
+import { Component, ViewChild, Inject, PLATFORM_ID, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { header } from './components/header/header';
@@ -13,8 +14,6 @@ import { SideBar } from './components/side-bar/side-bar';
   styleUrls: ['./app.css']  
 })
 export class App implements OnDestroy {
-  protected readonly title = signal('GamesLords');
-  
   @ViewChild('sidebar') sidebar!: SideBar;
   private isBrowser: boolean;
 
@@ -25,20 +24,10 @@ export class App implements OnDestroy {
   toggleSidebar() {
     if (this.sidebar) {
       this.sidebar.toggle();
-      
-      // Solo ejecutar en el navegador
-      if (this.isBrowser) {
-        if (this.sidebar.abierto) {
-          document.body.classList.add('sidebar-open');
-        } else {
-          document.body.classList.remove('sidebar-open');
-        }
-      }
     }
   }
 
   ngOnDestroy() {
-    // Solo ejecutar en el navegador
     if (this.isBrowser) {
       document.body.classList.remove('sidebar-open');
     }

@@ -1,4 +1,5 @@
 <!-- Hero Section - Fondo pastel rosa suave -->
+<!-- Hero Section - Fondo pastel rosa suave -->
 <section class="hero-section py-5">
   <div class="container">
     <div class="row align-items-center g-5">
@@ -7,30 +8,42 @@
           <i class="bi bi-house-heart-fill me-2"></i>Domus
         </h1>
         <p class="lead fs-3 text-pastel-gray">
-          El corazón digital de tu hogar
+          El corazon digital de tu hogar
         </p>
         <p class="fs-5 text-secondary mb-4">
-          Organiza, comparte y simplifica la vida en casa con una herramienta diseñada para la gestión integral del hogar.
+          Organiza, comparte y simplifica la vida en casa con una herramienta diseñada para la gestion integral del hogar.
         </p>
         <div class="d-flex gap-3">
-          <a routerLink="/register" class="btn btn-pastel-primary btn-lg px-4 shadow-sm">
-            <i class="bi bi-person-plus-fill me-2"></i>Crear cuenta gratis
-          </a>
-          <a routerLink="/login" class="btn btn-outline-pastel-primary btn-lg px-4">
-            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
-          </a>
+          <!-- Si NO está logueado, muestra los botones de registro/login -->
+          <ng-container *ngIf="!isLoggedIn">
+            <a routerLink="/register" class="btn btn-pastel-primary btn-lg px-4 shadow-sm">
+              <i class="bi bi-person-plus-fill me-2"></i>Crear cuenta gratis
+            </a>
+            <a routerLink="/login" class="btn btn-outline-pastel-primary btn-lg px-4">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesion
+            </a>
+          </ng-container>
+          
+          <!-- Si está logueado, muestra el nuevo boton -->
+          <ng-container *ngIf="isLoggedIn">
+            <a routerLink="/home" routerLinkActive="active" class="btn btn-pastel-primary btn-lg px-4 shadow-sm">
+              <i class="bi bi-house-door-fill me-2"></i>Hechale un vistazo a tus hogares
+            </a>
+          </ng-container>
         </div>
       </div>
       <div class="col-lg-6">
         <img 
           src="https://placehold.co/600x400/f8e1e8/6d5c63?text=Familia+Domus" 
-          alt="Ilustración de familia usando Domus" 
+          alt="Ilustracion de familia usando Domus" 
           class="img-fluid rounded-4 shadow-lg"
         />
       </div>
     </div>
   </div>
 </section>
+
+<!-- El resto de tu HTML se mantiene igual -->
 
 <!-- Features / Funcionalidades - Fondo blanco roto -->
 <section id="services" class="py-5 bg-pastel-cream">

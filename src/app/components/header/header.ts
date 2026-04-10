@@ -1,40 +1,46 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+// header.ts
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './header.html',
-  styleUrls: ['./header.css']
+  styleUrls: ['./header.css']   
 })
-export class header {
+export class header implements OnInit, OnDestroy {   
+  isLoggedIn = false;
+  private authSubscription?: Subscription;
+
   @Output() toggleSidebar = new EventEmitter<void>();
-  @Input() titulo: string = 'Mi App';
-  @Input() usuarioNombre: string = 'Usuario';
 
-  isLoggedIn: boolean = true;
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  onToggleSidebar() {
-    console.log('Header button clicked'); // Debug
+  ngOnInit() {
+    this.authSubscription = this.authService.isLoggedIn$.subscribe(
+      (loggedIn: boolean) => {
+        this.isLoggedIn = loggedIn;
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    this.authSubscription?.unsubscribe();
+  }
+
+  openSidebar() {
     this.toggleSidebar.emit();
   }
 
-  mostrarPerfil() {
-    console.log('Mostrar perfil');
-  }
-
-  mostrarConfiguracion() {
-    console.log('Mostrar configuración');
-  }
-
-  login() {
-    this.isLoggedIn = true;
-    console.log('Usuario inició sesión');
-  }
-
-  logout() {
-    this.isLoggedIn = false;
-    console.log('Usuario cerró sesión');
+  cerrarSesion() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

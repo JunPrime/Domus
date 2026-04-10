@@ -98,7 +98,7 @@ form {
   border: 2px solid #e8f0e6;
   border-radius: 14px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
   background: #fefef8;
   font-family: inherit;
 }

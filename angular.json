@@ -34,14 +34,7 @@
               "node_modules/@popperjs/core/dist/umd/popper.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "security": {
-              "allowedHosts": []
-            },
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "baseHref": "/Domus/"
           },
           "configurations": {
             "production": {
@@ -86,9 +79,9 @@
           "builder": "@angular/build:unit-test"
         },
         "deploy": {
-  "builder": "angular-cli-ghpages:deploy",
-  "options": {}
-}
+          "builder": "angular-cli-ghpages:deploy",
+          "options": {}
+        }
       }
     }
   }

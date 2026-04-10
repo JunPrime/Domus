@@ -1,31 +1,26 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
+<!-- header.html - Versión simplificada -->
+<header class="app-header">
+  <!-- Botón de menú para sidebar -->
+  <button class="menu-btn" (click)="openSidebar()">
+    <i class="bi bi-list"></i>
+  </button>
 
-    <!-- Este botón ahora emite el evento -->
-    <button class="menu-toggle" type="button" (click)="onToggleSidebar()">
-      <i class="bi bi-list"></i>
-    </button>
-
-    <div class="navbar-nav ms-auto">
-      <div class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-          <img src="https://ui-avatars.com/api/?background=2d6a4f&color=fff&rounded=true&bold=true&size=32" 
-               alt="Perfil" 
-               class="rounded-circle">
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" routerLink="/profile">
-            <i class="bi bi-person-circle"></i> Mi Perfil
-          </a></li>
-          <li><a class="dropdown-item" routerLink="/settings">
-            <i class="bi bi-sliders2"></i> Configuración
-          </a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" (click)="logout()">
-            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-          </a></li>
-        </ul>
-      </div>
-    </div>
+  <!-- Logo centrado -->
+  <div class="logo">
+    <i class="bi bi-house-heart-fill"></i>
+    <span>Domus</span>
   </div>
-</nav>
+
+  <!-- Cerrar sesión como ícono -->
+  <div class="user-menu" *ngIf="isLoggedIn">
+    <button class="logout-icon" (click)="cerrarSesion()" title="Cerrar sesión">
+      <i class="bi bi-box-arrow-right"></i>
+    </button>
+  </div>
+
+  <!-- Botones de auth si NO está logueado -->
+  <div class="auth-buttons" *ngIf="!isLoggedIn">
+    <a routerLink="/login" class="btn-login">Iniciar sesión</a>
+    <a routerLink="/register" class="btn-register">Registrarse</a>
+  </div>
+</header>

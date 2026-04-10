@@ -1,115 +1,110 @@
 <div class="hogares-container">
+  <!-- Header -->
   <div class="header">
     <h1>Mis Hogares</h1>
-    <button class="crear-btn" (click)="abrirModal()" [disabled]="loading || creando">
-      ➕ Crear Hogar
+    <button class="crear-btn" (click)="abrirModal()">
+      <i class="bi bi-plus-circle"></i> Crear Hogar
     </button>
   </div>
 
-  <!-- Mensaje de carga -->
-  <div class="loading-state" *ngIf="loading">
-    <p>Cargando hogares...</p>
+  <!-- Loading -->
+  <div *ngIf="loading" class="empty-state">
+    <div class="empty-icon"></div>
+    <h3>Cargando hogares...</h3>
+    <p>Por favor espera</p>
   </div>
 
-  <!-- Mensaje de error -->
-  <div class="error-state" *ngIf="error && !loading">
-    <p>{{ error }}</p>
-    <button (click)="cargarHogares()">Reintentar</button>
-  </div>
-
-  <!-- Mensaje cuando no hay hogares -->
-  <div class="empty-state" *ngIf="!loading && hogares.length === 0 && !error">
-    <div class="empty-icon">🏠</div>
-    <h3>No tienes hogares creados</h3>
-    <p>Comienza creando tu primer hogar</p>
+  <!-- Sin hogares -->
+  <div *ngIf="!loading && hogares.length === 0 && !error" class="empty-state">
+    <div class="empty-icon"></div>
+    <h3>No tienes hogares aún</h3>
+    <p>Crea tu primer hogar para comenzar a organizar tu familia</p>
     <button class="crear-btn-empty" (click)="abrirModal()">
-      ➕ Crear mi primer hogar
+      <i class="bi bi-plus-circle"></i> Crear mi primer hogar
     </button>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="empty-state">
+    <div class="empty-icon"></div>
+    <h3>Error</h3>
+    <p>{{ error }}</p>
   </div>
 
   <!-- Grid de hogares -->
-  <div class="hogares-grid" *ngIf="!loading && hogares.length > 0">
-    <div class="hogar-card" *ngFor="let hogar of hogares; trackBy: trackById"
-         [style.background]="hogar.color" 
-         [style.color]="hogar.textColor">
-      
+  <div *ngIf="!loading && hogares.length > 0" class="hogares-grid">
+    <div *ngFor="let hogar of hogares; trackBy: trackById" class="hogar-card" [style.backgroundColor]="hogar.color"
+      (click)="entrarHogar(hogar)">
+
       <div class="card-header">
-        <h3>{{ hogar.nombre_familiar }}</h3>
+        <h3 [style.color]="hogar.textColor">{{ hogar.nombre_familiar }}</h3>
         <div class="card-menu">
-          <button class="menu-btn" (click)="editarHogar(hogar)" [disabled]="loading">
-            ✏️
+          <button class="menu-btn" (click)="editarHogar($event, hogar)" title="Editar">
+            <i class="bi bi-pencil"></i>
           </button>
-          <button class="menu-btn" (click)="eliminarHogar(hogar)" [disabled]="loading">
-            🗑️
+          <button class="menu-btn" (click)="eliminarHogar($event, hogar)" title="Eliminar">
+            <i class="bi bi-trash"></i>
           </button>
         </div>
       </div>
-      
+
       <div class="card-body">
-        <p>ID: {{ hogar.id_hogar }}</p>
+        <p [style.color]="hogar.textColor">ID: {{ hogar.id_hogar }}</p>
       </div>
-      
+
       <div class="card-footer">
-        <button class="entrar-btn" (click)="entrarHogar(hogar)">
+        <button class="entrar-btn" [style.color]="hogar.textColor">
           Entrar al hogar →
         </button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal para crear hogar -->
-  <div class="modal" [class.active]="mostrarModal" (click)="cerrarModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>🏠 Crear Nuevo Hogar</h2>
-        <button class="modal-close" (click)="cerrarModal()">×</button>
-      </div>
-      
-      <div class="modal-body">
-        <div class="campo">
-          <label>📛 Nombre del hogar:</label>
-          <input 
-            type="text" 
-            [(ngModel)]="nuevoTitulo" 
-            placeholder="Ej: Mi Casa, Departamento, etc."
-            autofocus />
-        </div>
-
-        <div class="campo">
-          <label>🎨 Color de la card:</label>
-          <div class="color-options">
-            <div 
-              class="color-box" 
-              *ngFor="let color of coloresPastel" 
-              [style.background]="color"
-              [class.selected]="nuevoColor === color"
-              (click)="nuevoColor = color">
-            </div>
-          </div>
-        </div>
-
-        <!-- Vista previa -->
-        <div class="preview" *ngIf="nuevoTitulo.trim().length > 0">
-          <label>📱 Vista previa:</label>
-          <div class="preview-card" [style.background]="nuevoColor" [style.color]="textColors[nuevoColor]">
-            {{ nuevoTitulo }}
-          </div>
-        </div>
-        
-        <!-- Error en modal -->
-        <div class="error-message" *ngIf="error">
-          {{ error }}
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        
-        <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
-        <button class="btn-guardar" (click)="guardarHogar()" [disabled]="!nuevoTitulo.trim() || creando">
-          {{ creando ? 'Guardando...' : '💾 Guardar Hogar' }}
-        </button>
-      </div>
-      <!-- Botón de prueba fuera del modal -->
+<!-- Modal de Crear (sin selector de color) -->
+<div class="modal" [class.active]="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Crear nuevo hogar</h3>
+      <button class="modal-close" (click)="cerrarModal()">&times;</button>
     </div>
+
+    <div class="campo">
+      <label>Nombre del hogar</label>
+      <input type="text" [(ngModel)]="nuevoTitulo" placeholder="Ej: Familia Pérez" (keyup.enter)="guardarHogar()" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarHogar()">
+        {{ creando ? 'Creando...' : 'Crear hogar' }}
+      </button>
+    </div>
+
+    <p *ngIf="error" class="error-text" style="color: red; margin-top: 10px;">{{ error }}</p>
+  </div>
+</div>
+
+<!-- Modal de Editar (sin selector de color) -->
+<div class="modal" [class.active]="mostrarModalEditar" (click)="cerrarModalEditar()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar hogar</h3>
+      <button class="modal-close" (click)="cerrarModalEditar()">&times;</button>
+    </div>
+
+    <div class="campo">
+      <label>Nombre del hogar</label>
+      <input type="text" [(ngModel)]="nombreEditado" placeholder="Ej: Familia Pérez" (keyup.enter)="guardarEdicion()" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" (click)="cerrarModalEditar()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarEdicion()">
+        {{ creando ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+
+    <p *ngIf="error" class="error-text" style="color: red; margin-top: 10px;">{{ error }}</p>
   </div>
 </div>

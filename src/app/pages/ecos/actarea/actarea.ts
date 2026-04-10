@@ -1,353 +1,638 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
-export type Actividad = {
-  id: string;
+export interface Evento {
+  id: number;
   nombre: string;
-  fechaHora: Date;
-  tipo: 'actividad';
-};
-
-export type Tarea = {
-  id: string;
-  nombre: string;
-  fecha: Date;
+  tipo: 'actividad' | 'tarea';
+  descripcion?: string;
+  fechaHora?: Date;
+  fecha?: Date;
   completada: boolean;
-  tipo: 'tarea';
-};
+  completadaEn?: Date;
+  id_miembro_f?: number;
+  duracion_minutos?: number;
+}
+
+export interface DiaCalendario {
+  date: Date | null;
+  eventos: Evento[];
+}
 
 @Component({
   selector: 'app-actarea',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './actarea.html',
   styleUrls: ['./actarea.css']
 })
-export class ActareaComponent implements OnInit, AfterViewInit {
-  actividades: Actividad[] = [];
-  tareas: Tarea[] = [];
+export class Actarea implements OnInit {
+  // Propiedades del calendario
+  monthYearDisplay: string = '';
+  weekDays: string[] = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  daysInCalendar: DiaCalendario[] = [];
   currentDate: Date = new Date();
+  
+  // Propiedades de formularios
+  nuevaActividadNombre: string = '';
+  nuevaActividadDescripcion: string = '';
+  nuevaActividadFechaHora: string = '';
+  
+  nuevaTareaNombre: string = '';
+  nuevaTareaDescripcion: string = '';
+  nuevaTareaFecha: string = '';
+  nuevaTareaHora: string = '';
+  nuevaTareaDuracion: number = 30;
+  
+  // Listas principales
+  actividades: Evento[] = [];
+  tareas: Evento[] = [];
+  
+  // Filtros
+  filtroActividades: 'todas' | 'pendientes' | 'completadas' = 'pendientes';
+  filtroTareas: 'todas' | 'pendientes' | 'completadas' = 'pendientes';
 
-  constructor() {}
+  // Control del calendario visible/colapsado
+  calendarioVisible: boolean = true;
 
-  ngOnInit(): void {
-    this.cargarStorage();
+  // Variables de estado
+  loading: boolean = true;
+  error: string = '';
+  private isBrowser: boolean;
+  private actualizando: boolean = false;
+  
+  // IDs
+  private idMiembroActual: number = 0;
+  private idHogarActual: number = 0;
+  private miembroNombre: string = '';
+
+  // URLs de API
+  private API_ACTIVIDADES_URL = 'https://codigo-production.up.railway.app/actividades';
+  private API_TAREAS_URL = 'https://codigo-production.up.railway.app/tareas';
+  private API_HOGARES_URL = 'https://codigo-production.up.railway.app/hogares/hogares';
+
+  constructor(
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  ngAfterViewInit(): void {
-    this.renderizarTodo();
-    this.asignarEventosGlobales();
-  }
-
-  generarId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2);
-  }
-
-  guardarEnStorage(): void {
-     if (typeof localStorage === 'undefined') return;
-    const data = {
-      actividades: this.actividades.map(a => ({ ...a, fechaHora: a.fechaHora.toISOString() })),
-      tareas: this.tareas.map(t => ({ ...t, fecha: t.fecha.toISOString() }))
-    };
-    localStorage.setItem('planificador_data', JSON.stringify(data));
-  }
-
-  cargarStorage(): void {
-     if (typeof localStorage === 'undefined') return;
-    const raw = localStorage.getItem('planificador_data');
-    if (!raw) return;
-    try {
-      const data = JSON.parse(raw);
-      if (data.actividades) {
-        this.actividades = data.actividades.map((a: any) => ({
-          ...a,
-          fechaHora: new Date(a.fechaHora),
-          tipo: 'actividad'
-        }));
-      }
-      if (data.tareas) {
-        this.tareas = data.tareas.map((t: any) => ({
-          ...t,
-          fecha: new Date(t.fecha),
-          tipo: 'tarea',
-          completada: t.completada ?? false
-        }));
-      }
-    } catch(e) {
-      console.warn(e);
+  ngOnInit() {
+    if (this.isBrowser) {
+      this.obtenerMiembroSeleccionado();
     }
   }
 
-  obtenerEventosDelDia(fecha: Date): (Actividad | Tarea)[] {
-    const year = fecha.getFullYear();
-    const month = fecha.getMonth();
-    const day = fecha.getDate();
-
-    const actividadesDelDia = this.actividades.filter(act => {
-      const actDate = act.fechaHora;
-      return actDate.getFullYear() === year && actDate.getMonth() === month && actDate.getDate() === day;
-    });
-
-    const tareasDelDia = this.tareas.filter(t => {
-      if (t.completada) return false;
-      const tareaDate = t.fecha;
-      return tareaDate.getFullYear() === year && tareaDate.getMonth() === month && tareaDate.getDate() === day;
-    });
-
-    return [...actividadesDelDia, ...tareasDelDia];
+  private getAuthHeaders(): HeadersInit {
+    const token = localStorage.getItem('access_token');
+    const tokenType = localStorage.getItem('token_type') || 'bearer';
+    return {
+      'Authorization': `${tokenType} ${token}`,
+      'Content-Type': 'application/json',
+    };
   }
 
-  renderizarCalendario(): void {
+  obtenerMiembroSeleccionado() {
+    const miembroGuardado = sessionStorage.getItem('miembroSeleccionado');
+    if (miembroGuardado) {
+      try {
+        const miembro = JSON.parse(miembroGuardado);
+        this.idMiembroActual = miembro.id;
+        this.miembroNombre = miembro.nombre;
+        console.log('👤 Miembro seleccionado:', this.miembroNombre, 'ID:', this.idMiembroActual);
+        
+        // Obtener también el hogar actual
+        this.obtenerHogarActual();
+      } catch (error) {
+        console.error('Error al parsear miembro:', error);
+        this.error = 'No se pudo obtener el miembro seleccionado';
+        this.loading = false;
+      }
+    } else {
+      console.warn('No hay miembro seleccionado');
+      this.error = 'No hay un miembro seleccionado. Por favor selecciona un miembro primero.';
+      this.loading = false;
+    }
+  }
+
+  obtenerHogarActual() {
+    const hogarActual = localStorage.getItem('hogar_actual');
+    if (hogarActual) {
+      try {
+        const hogar = JSON.parse(hogarActual);
+        this.idHogarActual = hogar.id_hogar;
+        console.log('🏠 Hogar actual:', this.idHogarActual);
+        this.cargarDatos();
+      } catch (error) {
+        console.error('Error al parsear hogar:', error);
+        this.error = 'No se pudo obtener el hogar actual';
+        this.loading = false;
+      }
+    } else {
+      console.warn('No hay hogar seleccionado');
+      this.error = 'No hay un hogar seleccionado';
+      this.loading = false;
+    }
+  }
+
+  async cargarDatos() {
+    await Promise.all([
+      this.cargarActividades(),
+      this.cargarTareas()
+    ]);
+    this.inicializarCalendario();
+    this.loading = false;
+    this.cdr.detectChanges();
+  }
+
+  // ==================== API ACTIVIDADES ====================
+  
+  async cargarActividades() {
+    try {
+      const url = `${this.API_ACTIVIDADES_URL}/miembros/${this.idMiembroActual}/actividades`;
+      console.log('📡 Fetching actividades from:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      if (response.status === 401) {
+        this.redirigirLogin();
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('📊 Actividades recibidas:', data);
+      
+      this.actividades = data.map((act: any) => ({
+        id: act.id_actividad,
+        nombre: `Actividad ${act.id_actividad}`,
+        tipo: 'actividad',
+        fechaHora: act.hora ? new Date(`2000-01-01T${act.hora}`) : undefined,
+        completada: false,
+        descripcion: `Días: ${act.dias_semana}, Duración: ${act.duracion_minutos}min`,
+        duracion_minutos: act.duracion_minutos
+      }));
+      
+    } catch (error: any) {
+      console.error('❌ Error cargando actividades:', error);
+      this.actividades = [];
+    }
+  }
+
+  async crearActividadAPI(): Promise<boolean> {
+    try {
+      const fechaHora = new Date(this.nuevaActividadFechaHora);
+      const hora = fechaHora.toTimeString().split(' ')[0];
+      const fecha = fechaHora.toISOString().split('T')[0];
+      
+      const body = {
+        repetitiva_semanal: false,
+        hora: hora,
+        dias_semana: null,
+        duracion_minutos: 60,
+        economica: false
+      };
+      
+      const url = `${this.API_ACTIVIDADES_URL}/miembros/${this.idMiembroActual}/actividades`;
+      console.log('📡 POST actividad a:', url, body);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(body)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al crear actividad');
+      }
+      
+      await this.cargarActividades();
+      return true;
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      this.error = error.message;
+      return false;
+    }
+  }
+
+  async eliminarActividadAPI(id: number): Promise<boolean> {
+    try {
+      const url = `${this.API_ACTIVIDADES_URL}/${id}`;
+      console.log('📡 DELETE actividad a:', url);
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      if (response.status === 204 || response.status === 200) {
+        await this.cargarActividades();
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      return false;
+    }
+  }
+
+  // ==================== API TAREAS ====================
+  
+  async cargarTareas() {
+    try {
+      const url = `${this.API_TAREAS_URL}/hogares/${this.idHogarActual}/tareas`;
+      console.log('📡 Fetching tareas from:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      if (response.status === 401) {
+        this.redirigirLogin();
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('📊 Tareas recibidas:', data);
+      
+      this.tareas = data.map((tarea: any) => ({
+        id: tarea.id_tarea,
+        nombre: tarea.nombre,
+        tipo: 'tarea',
+        descripcion: tarea.descripcion,
+        fecha: tarea.fecha ? new Date(tarea.fecha) : undefined,
+        completada: tarea.realizada || false,
+        id_miembro_f: tarea.id_miembro_f,
+        duracion_minutos: tarea.duracion_minutos
+      }));
+      
+    } catch (error: any) {
+      console.error('❌ Error cargando tareas:', error);
+      this.tareas = [];
+    }
+  }
+
+  async crearTareaAPI(): Promise<boolean> {
+    try {
+      const body: any = {
+        nombre: this.nuevaTareaNombre,
+        descripcion: this.nuevaTareaDescripcion || null,
+        solo_adulto: false,
+        duracion_minutos: this.nuevaTareaDuracion,
+        id_hogar_f: this.idHogarActual
+      };
+      
+      if (this.nuevaTareaFecha) {
+        body.fecha = this.nuevaTareaFecha;
+      }
+      if (this.nuevaTareaHora) {
+        body.hora = this.nuevaTareaHora;
+      }
+      
+      const url = `${this.API_TAREAS_URL}/hogares/${this.idHogarActual}/tareas`;
+      console.log('📡 POST tarea a:', url, body);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(body)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al crear tarea');
+      }
+      
+      const newTarea = await response.json();
+      
+      // Si hay miembro asignado, asignar la tarea
+      if (this.idMiembroActual && newTarea.id_tarea) {
+        await this.asignarTarea(newTarea.id_tarea);
+      }
+      
+      await this.cargarTareas();
+      return true;
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      this.error = error.message;
+      return false;
+    }
+  }
+
+  async asignarTarea(idTarea: number) {
+    try {
+      const url = `${this.API_TAREAS_URL}/tareas/${idTarea}/asignar`;
+      const body = {
+        id_miembro: this.idMiembroActual,
+        fecha: this.nuevaTareaFecha || new Date().toISOString().split('T')[0],
+        hora: this.nuevaTareaHora || null,
+        duracion_minutos: this.nuevaTareaDuracion,
+        repetitiva: 0
+      };
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(body)
+      });
+      
+      if (!response.ok) {
+        console.error('Error asignando tarea:', await response.json());
+      }
+    } catch (error) {
+      console.error('Error asignando tarea:', error);
+    }
+  }
+
+  async completarTareaAPI(id: number): Promise<boolean> {
+    try {
+      const url = `${this.API_TAREAS_URL}/tareas/${id}/completar`;
+      console.log('📡 PUT completar tarea a:', url);
+      
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: this.getAuthHeaders()
+      });
+      
+      if (response.ok) {
+        await this.cargarTareas();
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      return false;
+    }
+  }
+
+  async eliminarTareaAPI(id: number): Promise<boolean> {
+    try {
+      const url = `${this.API_TAREAS_URL}/tareas/${id}`;
+      console.log('📡 DELETE tarea a:', url);
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      if (response.status === 204 || response.status === 200) {
+        await this.cargarTareas();
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error('❌ Error:', error);
+      return false;
+    }
+  }
+
+  // ==================== MÉTODOS DEL CALENDARIO ====================
+  
+  toggleCalendario() {
+    this.calendarioVisible = !this.calendarioVisible;
+  }
+
+  inicializarCalendario() {
+    this.actualizarDisplayMes();
+    this.generarDiasCalendario();
+  }
+
+  actualizarDisplayMes() {
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    this.monthYearDisplay = `${meses[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+  }
+
+  generarDiasCalendario() {
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
-
-    const firstDayOfMonth = new Date(year, month, 1);
-    const startWeekday = firstDayOfMonth.getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    const monthYearDisplay = document.getElementById('monthYearDisplay');
-    if (monthYearDisplay) {
-      monthYearDisplay.textContent = firstDayOfMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    
+    const primerDiaMes = new Date(year, month, 1);
+    const ultimoDiaMes = new Date(year, month + 1, 0);
+    
+    const diaInicioSemana = primerDiaMes.getDay();
+    const totalDias = ultimoDiaMes.getDate();
+    
+    this.daysInCalendar = [];
+    
+    for (let i = 0; i < diaInicioSemana; i++) {
+      this.daysInCalendar.push({ date: null, eventos: [] });
     }
-
-    const calendarGrid = document.getElementById('calendarGrid');
-    if (!calendarGrid) return;
-    calendarGrid.innerHTML = '';
-
-    for (let i = 0; i < startWeekday; i++) {
-      const emptyDiv = document.createElement('div');
-      emptyDiv.className = 'calendar-day empty';
-      calendarGrid.appendChild(emptyDiv);
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dayDate = new Date(year, month, d);
-      const dayDiv = document.createElement('div');
-      dayDiv.className = 'calendar-day';
-
-      const dayNumberSpan = document.createElement('span');
-      dayNumberSpan.className = 'day-number';
-      dayNumberSpan.textContent = d.toString();
-      dayDiv.appendChild(dayNumberSpan);
-
-      const eventos = this.obtenerEventosDelDia(dayDate);
-      eventos.sort((a, b) => {
-        if (a.tipo === 'actividad' && b.tipo === 'tarea') return -1;
-        if (a.tipo === 'tarea' && b.tipo === 'actividad') return 1;
-        return 0;
+    
+    for (let i = 1; i <= totalDias; i++) {
+      const fecha = new Date(year, month, i);
+      this.daysInCalendar.push({ 
+        date: fecha, 
+        eventos: this.obtenerEventosDelDia(fecha)
       });
-
-      for (const ev of eventos) {
-        const badge = document.createElement('div');
-        badge.className = `event-badge ${ev.tipo === 'actividad' ? 'badge-actividad' : 'badge-tarea'}`;
-        let texto = ev.nombre;
-        if (ev.tipo === 'actividad') {
-          const hora = (ev as Actividad).fechaHora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          texto = `${ev.nombre} (${hora})`;
-        } else {
-          texto = `🧹 ${ev.nombre}`;
-        }
-        badge.textContent = texto;
-        dayDiv.appendChild(badge);
-      }
-      calendarGrid.appendChild(dayDiv);
+    }
+    
+    const celdasRestantes = 42 - this.daysInCalendar.length;
+    for (let i = 0; i < celdasRestantes; i++) {
+      this.daysInCalendar.push({ date: null, eventos: [] });
     }
   }
 
-  renderizarListas(): void {
-    const listaActividadesUl = document.getElementById('listaActividades');
-    if (listaActividadesUl) {
-      listaActividadesUl.innerHTML = '';
-      this.actividades.forEach(act => {
-        const li = document.createElement('li');
-        const fechaFormateada = act.fechaHora.toLocaleString();
-        li.innerHTML = `
-          <span><strong>${act.nombre}</strong><br><small>📅 ${fechaFormateada}</small></span>
-          <button class="btn-eliminar" data-id="${act.id}" data-tipo="actividad">🗑️</button>
-        `;
-        listaActividadesUl.appendChild(li);
-      });
-    }
-
-    const listaTareasPendientesUl = document.getElementById('listaTareasPendientes');
-    if (listaTareasPendientesUl) {
-      const tareasPendientes = this.tareas.filter(t => !t.completada);
-      listaTareasPendientesUl.innerHTML = '';
-      tareasPendientes.forEach(t => {
-        const li = document.createElement('li');
-        const fechaStr = t.fecha.toLocaleDateString();
-        li.innerHTML = `
-          <span class="tarea-text">📌 ${t.nombre} <span class="fecha-text">(📆 ${fechaStr})</span></span>
-          <div>
-            <button class="btn-completar" data-id="${t.id}" data-tipo="tarea-completar">✔️ Completar</button>
-            <button class="btn-eliminar" data-id="${t.id}" data-tipo="tarea-eliminar">🗑️</button>
-          </div>
-        `;
-        listaTareasPendientesUl.appendChild(li);
-      });
-    }
-
-    const listaTareasCompletadasUl = document.getElementById('listaTareasCompletadas');
-    if (listaTareasCompletadasUl) {
-      const tareasCompletadas = this.tareas.filter(t => t.completada);
-      listaTareasCompletadasUl.innerHTML = '';
-      tareasCompletadas.forEach(t => {
-        const li = document.createElement('li');
-        const fechaStr = t.fecha.toLocaleDateString();
-        li.innerHTML = `
-          ✅ ${t.nombre} <span style="font-size:0.7rem;">(completada - ${fechaStr})</span>
-          <button class="btn-eliminar" data-id="${t.id}" data-tipo="tarea-eliminar-completada" style="background:#b91c1c; margin-left:8px;">🗑️</button>
-        `;
-        listaTareasCompletadasUl.appendChild(li);
-      });
-    }
-  }
-
-  asignarEventosGlobales(): void {
-    // Botones de navegación
-    const prevBtn = document.getElementById('prevMonthBtn');
-    const nextBtn = document.getElementById('nextMonthBtn');
-    if (prevBtn) {
-      prevBtn.addEventListener('click', () => this.cambiarMes(-1));
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener('click', () => this.cambiarMes(1));
-    }
-
-    // Botones de agregar
-    const addActividadBtn = document.getElementById('agregarActividadBtn');
-    const addTareaBtn = document.getElementById('agregarTareaBtn');
-    if (addActividadBtn) {
-      addActividadBtn.addEventListener('click', () => this.agregarActividad());
-    }
-    if (addTareaBtn) {
-      addTareaBtn.addEventListener('click', () => this.agregarTarea());
-    }
-
-    // Eventos dinámicos para botones generados
-    document.body.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      
-      // Eliminar actividad
-      if (target.classList.contains('btn-eliminar') && target.dataset['tipo'] === 'actividad') {
-        const id = target.dataset['id'];
-        if (id) {
-          this.actividades = this.actividades.filter(a => a.id !== id);
-          this.guardarEnStorage();
-          this.renderizarTodo();
-        }
-      }
-      
-      // Completar tarea
-      if (target.classList.contains('btn-completar') && target.dataset['tipo'] === 'tarea-completar') {
-        const id = target.dataset['id'];
-        if (id) {
-          const tarea = this.tareas.find(t => t.id === id);
-          if (tarea && !tarea.completada) {
-            tarea.completada = true;
-            this.guardarEnStorage();
-            this.renderizarTodo();
-          }
-        }
-      }
-      
-      // Eliminar tarea pendiente
-      if (target.classList.contains('btn-eliminar') && target.dataset['tipo'] === 'tarea-eliminar') {
-        const id = target.dataset['id'];
-        if (id) {
-          this.tareas = this.tareas.filter(t => t.id !== id);
-          this.guardarEnStorage();
-          this.renderizarTodo();
-        }
-      }
-      
-      // Eliminar tarea completada
-      if (target.classList.contains('btn-eliminar') && target.dataset['tipo'] === 'tarea-eliminar-completada') {
-        const id = target.dataset['id'];
-        if (id) {
-          this.tareas = this.tareas.filter(t => t.id !== id);
-          this.guardarEnStorage();
-          this.renderizarTodo();
-        }
+  obtenerEventosDelDia(fecha: Date): Evento[] {
+    const eventos: Evento[] = [];
+    
+    this.actividades.forEach(actividad => {
+      if (!actividad.completada && actividad.fechaHora && this.mismaFecha(actividad.fechaHora, fecha)) {
+        eventos.push(actividad);
       }
     });
+    
+    this.tareas.forEach(tarea => {
+      if (!tarea.completada && tarea.fecha && this.mismaFecha(tarea.fecha, fecha)) {
+        eventos.push(tarea);
+      }
+    });
+    
+    return eventos;
   }
 
-  renderizarTodo(): void {
-    this.renderizarCalendario();
-    this.renderizarListas();
+  mismaFecha(date1: Date, date2: Date): boolean {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
   }
 
-  agregarActividad(): void {
-    const nombreInput = document.getElementById('actividadNombre') as HTMLInputElement;
-    const fechaHoraInput = document.getElementById('actividadFechaHora') as HTMLInputElement;
-    
-    const nombre = nombreInput?.value.trim() || '';
-    const fechaHoraStr = fechaHoraInput?.value || '';
-    
-    if (!nombre) {
-      alert('Escribe el nombre de la actividad');
-      return;
-    }
-    if (!fechaHoraStr) {
-      alert('Selecciona fecha y hora para la actividad');
-      return;
-    }
-    const fechaHora = new Date(fechaHoraStr);
-    if (isNaN(fechaHora.getTime())) {
-      alert('Fecha/hora inválida');
-      return;
-    }
-
-    const nuevaActividad: Actividad = {
-      id: this.generarId(),
-      nombre: nombre,
-      fechaHora: fechaHora,
-      tipo: 'actividad'
-    };
-    this.actividades.push(nuevaActividad);
-    this.guardarEnStorage();
-
-    if (nombreInput) nombreInput.value = '';
-    if (fechaHoraInput) fechaHoraInput.value = '';
-    this.renderizarTodo();
+  isToday(date: Date | null): boolean {
+    if (!date) return false;
+    const hoy = new Date();
+    return this.mismaFecha(date, hoy);
   }
 
-  agregarTarea(): void {
-    const nombreInput = document.getElementById('tareaNombre') as HTMLInputElement;
-    const fechaInput = document.getElementById('tareaFecha') as HTMLInputElement;
-    
-    const nombre = nombreInput?.value.trim() || '';
-    const fechaStr = fechaInput?.value || '';
-    
-    if (!nombre) {
-      alert('Escribe el nombre de la tarea');
-      return;
-    }
-    if (!fechaStr) {
-      alert('Selecciona una fecha para la tarea');
-      return;
-    }
-    const fecha = new Date(fechaStr);
-    if (isNaN(fecha.getTime())) {
-      alert('Fecha inválida');
-      return;
-    }
-
-    const nuevaTarea: Tarea = {
-      id: this.generarId(),
-      nombre: nombre,
-      fecha: fecha,
-      completada: false,
-      tipo: 'tarea'
-    };
-    this.tareas.push(nuevaTarea);
-    this.guardarEnStorage();
-
-    if (nombreInput) nombreInput.value = '';
-    if (fechaInput) fechaInput.value = '';
-    this.renderizarTodo();
+  getDayName(date: Date): string {
+    const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    return dias[date.getDay()];
   }
 
-  cambiarMes(delta: number): void {
-    this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + delta, 1);
-    this.renderizarCalendario();
+  cambiarMes(direccion: number) {
+    this.currentDate.setMonth(this.currentDate.getMonth() + direccion);
+    this.actualizarDisplayMes();
+    this.generarDiasCalendario();
+  }
+
+  // ==================== MÉTODOS PARA ACTIVIDADES ====================
+  
+  async agregarActividad() {
+    if (this.actualizando) return;
+    this.actualizando = true;
+    
+    if (!this.nuevaActividadNombre || !this.nuevaActividadFechaHora) {
+      this.error = 'Completa todos los campos obligatorios';
+      this.actualizando = false;
+      return;
+    }
+    
+    const success = await this.crearActividadAPI();
+    if (success) {
+      this.limpiarFormularioActividad();
+      this.generarDiasCalendario();
+      this.cdr.detectChanges();
+    }
+    
+    this.actualizando = false;
+  }
+
+  async completarActividad(actividad: Evento) {
+    // Las actividades no tienen endpoint de completar por ahora
+    actividad.completada = true;
+    this.generarDiasCalendario();
+  }
+
+  async eliminarActividad(actividad: Evento) {
+    if (confirm('¿Eliminar esta actividad?')) {
+      const success = await this.eliminarActividadAPI(actividad.id);
+      if (success) {
+        this.generarDiasCalendario();
+        this.cdr.detectChanges();
+      }
+    }
+  }
+
+  // ==================== MÉTODOS PARA TAREAS ====================
+  
+  async agregarTarea() {
+    if (this.actualizando) return;
+    this.actualizando = true;
+    
+    if (!this.nuevaTareaNombre) {
+      this.error = 'El nombre de la tarea es obligatorio';
+      this.actualizando = false;
+      return;
+    }
+    
+    const success = await this.crearTareaAPI();
+    if (success) {
+      this.limpiarFormularioTarea();
+      this.generarDiasCalendario();
+      this.cdr.detectChanges();
+    }
+    
+    this.actualizando = false;
+  }
+
+  async completarTarea(tarea: Evento) {
+    const success = await this.completarTareaAPI(tarea.id);
+    if (success) {
+      this.generarDiasCalendario();
+      this.cdr.detectChanges();
+    }
+  }
+
+  async eliminarTarea(tarea: Evento) {
+    if (confirm('¿Eliminar esta tarea?')) {
+      const success = await this.eliminarTareaAPI(tarea.id);
+      if (success) {
+        this.generarDiasCalendario();
+        this.cdr.detectChanges();
+      }
+    }
+  }
+
+  // ==================== PROPIEDADES COMPUTADAS ====================
+  
+  get actividadesFiltradas(): Evento[] {
+    switch(this.filtroActividades) {
+      case 'pendientes':
+        return this.actividades.filter(a => !a.completada);
+      case 'completadas':
+        return this.actividades.filter(a => a.completada);
+      default:
+        return this.actividades;
+    }
+  }
+
+  get tareasFiltradas(): Evento[] {
+    switch(this.filtroTareas) {
+      case 'pendientes':
+        return this.tareas.filter(t => !t.completada);
+      case 'completadas':
+        return this.tareas.filter(t => t.completada);
+      default:
+        return this.tareas;
+    }
+  }
+
+  get actividadesPendientesCount(): number {
+    return this.actividades.filter(a => !a.completada).length;
+  }
+
+  get tareasPendientesCount(): number {
+    return this.tareas.filter(t => !t.completada).length;
+  }
+
+  // ==================== MÉTODOS AUXILIARES ====================
+  
+  obtenerTextoEvento(evento: Evento): string {
+    if (evento.nombre.length > 12) {
+      return evento.nombre.substring(0, 10) + '...';
+    }
+    return evento.nombre;
+  }
+
+  obtenerIconoEvento(evento: Evento): string {
+    if (evento.completada) return '✓';
+    return evento.tipo === 'actividad' ? '📅' : '✅';
+  }
+
+  limpiarFormularioActividad() {
+    this.nuevaActividadNombre = '';
+    this.nuevaActividadDescripcion = '';
+    this.nuevaActividadFechaHora = '';
+    this.error = '';
+  }
+
+  limpiarFormularioTarea() {
+    this.nuevaTareaNombre = '';
+    this.nuevaTareaDescripcion = '';
+    this.nuevaTareaFecha = '';
+    this.nuevaTareaHora = '';
+    this.nuevaTareaDuracion = 30;
+    this.error = '';
+  }
+
+  redirigirLogin() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('usuario');
+    this.router.navigate(['/login']);
   }
 }

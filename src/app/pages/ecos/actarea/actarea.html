@@ -1,55 +1,236 @@
-<div class="app-container">
-    <!-- Encabezado -->
-    <div class="house-header">
-        <h2>🏠 Miembros del Hogar</h2>
-        <div class="member-status">👥 Sin miembros registrados</div>
+<div class="actarea-container">
+  
+  <!-- Header -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-brand">
+        <i class="bi bi-calendar-check"></i>
+        <span class="brand-text">ActArea</span>
+      </div>
+      
+      <!-- Botón para colapsar/expandir el calendario -->
+      <button class="btn-toggle-calendario" type="button" (click)="toggleCalendario()">
+        <i class="bi" [class.bi-calendar-week]="!calendarioVisible" [class.bi-calendar-x]="calendarioVisible"></i>
+        <span>{{ calendarioVisible ? 'Ocultar Calendario' : 'Mostrar Calendario' }}</span>
+        <i class="bi" [class.bi-chevron-up]="calendarioVisible" [class.bi-chevron-down]="!calendarioVisible"></i>
+      </button>
+      
+      <!-- Estadísticas -->
+      <div class="stats-badges">
+        <span class="badge-actividad-header">
+          <i class="bi bi-calendar-event"></i> {{actividadesPendientesCount}}
+        </span>
+        <span class="badge-tarea-header">
+          <i class="bi bi-check2-square"></i> {{tareasPendientesCount}}
+        </span>
+      </div>
     </div>
+  </nav>
 
-    <!-- CALENDARIO (parte superior) -->
-    <div class="calendar-section">
-        <div class="calendar-toolbar">
-            <button id="prevMonthBtn" class="nav-btn">◀</button>
-            <h3 id="monthYearDisplay" class="month-year"></h3>
-            <button id="nextMonthBtn" class="nav-btn">▶</button>
-        </div>
-        <div class="calendar-weekdays">
-            <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
-        </div>
-        <div id="calendarGrid" class="calendar-grid"></div>
-    </div>
-
-    <!-- FORMULARIOS: Agregar Actividad / Tarea -->
-    <div class="forms-row">
-        <!-- Actividad (con hora) -->
-        <div class="form-card">
-            <h3>📅 Actividad</h3>
-            <input type="text" id="actividadNombre" placeholder="Nombre de la actividad">
-            <input type="datetime-local" id="actividadFechaHora">
-            <button id="agregarActividadBtn" class="btn-actividad">➕ Agregar Actividad</button>
-        </div>
-
-        <!-- Tarea del hogar (solo fecha) -->
-        <div class="form-card">
-            <h3>🧹 Tarea del hogar</h3>
-            <input type="text" id="tareaNombre" placeholder="Nombre de la tarea">
-            <input type="date" id="tareaFecha">
-            <button id="agregarTareaBtn" class="btn-tarea">➕ Agregar Tarea</button>
-        </div>
-    </div>
-
-    <!-- LISTADOS -->
-    <div class="listado-section">
-        <div class="listado-col">
-            <h3>📋 Actividades Programadas</h3>
-            <ul id="listaActividades" class="event-list"></ul>
-        </div>
-        <div class="listado-col">
-            <h3>✅ Tareas Pendientes</h3>
-            <ul id="listaTareasPendientes" class="event-list"></ul>
-            <div class="completadas-box">
-                <h4>✔️ Tareas Completadas</h4>
-                <ul id="listaTareasCompletadas" class="completed-list"></ul>
+  <!-- CALENDARIO COLAPSABLE - Siempre visible pero se puede contraer -->
+  <div class="calendario-wrapper" [class.collapsed]="!calendarioVisible">
+    <div class="calendario-section">
+      <div class="calendario-toolbar">
+        <button class="nav-btn" (click)="cambiarMes(-1)">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <span class="month-year">{{ monthYearDisplay | titlecase }}</span>
+        <button class="nav-btn" (click)="cambiarMes(1)">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+      
+      <div class="calendario-weekdays">
+        <div class="weekday" *ngFor="let day of weekDays">{{ day.substring(0, 3) }}</div>
+      </div>
+      
+      <div class="calendario-grid">
+        <div *ngFor="let day of daysInCalendar" 
+             class="calendario-celda" 
+             [class.empty]="!day.date"
+             [class.today]="isToday(day.date)">
+          <div class="celda-header" *ngIf="day.date">
+            <span class="dia-numero">{{ day.date.getDate() }}</span>
+            <span class="dia-nombre">{{ getDayName(day.date) }}</span>
+          </div>
+          <div class="celda-eventos" *ngIf="day.date">
+            <div *ngFor="let evento of day.eventos" 
+                 class="evento-item"
+                 [class.evento-actividad]="evento.tipo === 'actividad' && !evento.completada"
+                 [class.evento-actividad-completada]="evento.tipo === 'actividad' && evento.completada"
+                 [class.evento-tarea]="evento.tipo === 'tarea' && !evento.completada"
+                 [class.evento-tarea-completada]="evento.tipo === 'tarea' && evento.completada"
+                 (click)="evento.tipo === 'actividad' ? completarActividad(evento) : completarTarea(evento)">
+              <span class="evento-icono">{{ obtenerIconoEvento(evento) }}</span>
+              <span class="evento-texto">{{ obtenerTextoEvento(evento) }}</span>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Formularios -->
+  <div class="formularios-row">
+    <!-- Formulario Actividad -->
+    <div class="formulario-card actividad-form">
+      <h3><i class="bi bi-calendar-plus"></i> Nueva Actividad</h3>
+      <div class="campo-form">
+        <input type="text" 
+               [(ngModel)]="nuevaActividadNombre" 
+               placeholder="Ej: Ir a trabajar, Estudiar, Reunión..."
+               class="input-text">
+      </div>
+      <div class="campo-form">
+        <input type="text" 
+               [(ngModel)]="nuevaActividadDescripcion" 
+               placeholder="Descripción (opcional)"
+               class="input-text">
+      </div>
+      <div class="campo-form">
+        <input type="datetime-local" 
+               [(ngModel)]="nuevaActividadFechaHora"
+               class="input-date">
+      </div>
+      <button class="btn-agregar btn-actividad" (click)="agregarActividad()">
+        <i class="bi bi-plus-circle"></i> Agregar Actividad
+      </button>
+    </div>
+
+    <!-- Formulario Tarea -->
+    <div class="formulario-card tarea-form">
+      <h3><i class="bi bi-check2-circle"></i> Nueva Tarea</h3>
+      <div class="campo-form">
+        <input type="text" 
+               [(ngModel)]="nuevaTareaNombre" 
+               placeholder="Ej: Lavar platos, Barrer, Limpiar..."
+               class="input-text">
+      </div>
+      <div class="campo-form">
+        <input type="text" 
+               [(ngModel)]="nuevaTareaDescripcion" 
+               placeholder="Descripción (opcional)"
+               class="input-text">
+      </div>
+      <div class="campo-form">
+        <input type="date" 
+               [(ngModel)]="nuevaTareaFecha"
+               class="input-date">
+      </div>
+      <button class="btn-agregar btn-tarea" (click)="agregarTarea()">
+        <i class="bi bi-plus-circle"></i> Agregar Tarea
+      </button>
+    </div>
+  </div>
+
+  <!-- Listados de Actividades y Tareas -->
+  <div class="listados-section">
+    <!-- Actividades -->
+    <div class="listado-col">
+      <div class="listado-header">
+        <h3><i class="bi bi-calendar-event"></i> Actividades</h3>
+        <div class="filtros">
+          <button class="filtro-btn" [class.active]="filtroActividades === 'pendientes'" 
+                  (click)="filtroActividades = 'pendientes'">
+            Pendientes
+          </button>
+          <button class="filtro-btn" [class.active]="filtroActividades === 'completadas'" 
+                  (click)="filtroActividades = 'completadas'">
+            Completadas
+          </button>
+          <button class="filtro-btn" [class.active]="filtroActividades === 'todas'" 
+                  (click)="filtroActividades = 'todas'">
+            Todas
+          </button>
+        </div>
+      </div>
+      
+      <div class="eventos-lista">
+        <div *ngFor="let actividad of actividadesFiltradas" 
+             class="evento-card"
+             [class.completado]="actividad.completada">
+          <div class="evento-info">
+            <div class="evento-titulo">
+              <span class="evento-icono-grande"><i class="bi bi-calendar"></i></span>
+              <strong>{{ actividad.nombre }}</strong>
+            </div>
+            <div class="evento-detalle" *ngIf="actividad.descripcion">
+              📝 {{ actividad.descripcion }}
+            </div>
+            <div class="evento-fecha">
+              🕒 {{ actividad.fechaHora | date:'dd/MM/yyyy HH:mm' }}
+            </div>
+          </div>
+          <div class="evento-acciones">
+            <button *ngIf="!actividad.completada" 
+                    class="btn-completar" 
+                    (click)="completarActividad(actividad)">
+              <i class="bi bi-check-lg"></i> Completar
+            </button>
+            <button class="btn-eliminar" 
+                    (click)="eliminarActividad(actividad)">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
+          </div>
+        </div>
+        <div *ngIf="actividadesFiltradas.length === 0" class="mensaje-vacio">
+          <i class="bi bi-inbox"></i> No hay actividades pendientes
+        </div>
+      </div>
+    </div>
+
+    <!-- Tareas -->
+    <div class="listado-col">
+      <div class="listado-header">
+        <h3><i class="bi bi-check2-square"></i> Tareas del Hogar</h3>
+        <div class="filtros">
+          <button class="filtro-btn" [class.active]="filtroTareas === 'pendientes'" 
+                  (click)="filtroTareas = 'pendientes'">
+            Pendientes
+          </button>
+          <button class="filtro-btn" [class.active]="filtroTareas === 'completadas'" 
+                  (click)="filtroTareas = 'completadas'">
+            Completadas
+          </button>
+          <button class="filtro-btn" [class.active]="filtroTareas === 'todas'" 
+                  (click)="filtroTareas = 'todas'">
+            Todas
+          </button>
+        </div>
+      </div>
+      
+      <div class="eventos-lista">
+        <div *ngFor="let tarea of tareasFiltradas" 
+             class="evento-card"
+             [class.completado]="tarea.completada">
+          <div class="evento-info">
+            <div class="evento-titulo">
+              <span class="evento-icono-grande"><i class="bi bi-house"></i></span>
+              <strong>{{ tarea.nombre }}</strong>
+            </div>
+            <div class="evento-detalle" *ngIf="tarea.descripcion">
+              📝 {{ tarea.descripcion }}
+            </div>
+            <div class="evento-fecha">
+              📆 {{ tarea.fecha | date:'dd/MM/yyyy' }}
+            </div>
+          </div>
+          <div class="evento-acciones">
+            <button *ngIf="!tarea.completada" 
+                    class="btn-completar" 
+                    (click)="completarTarea(tarea)">
+              <i class="bi bi-check-lg"></i> Completar
+            </button>
+            <button class="btn-eliminar" 
+                    (click)="eliminarTarea(tarea)">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
+          </div>
+        </div>
+        <div *ngIf="tareasFiltradas.length === 0" class="mensaje-vacio">
+          <i class="bi bi-inbox"></i> No hay tareas pendientes
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,12 +17,16 @@ export class home implements OnInit {
   error: string = '';
   private isBrowser: boolean;
 
+  mostrarModalEditar = false;
+  hogarEditando: Hogar | null = null;
+  nombreEditado = '';
+
   mostrarModal = false;
   nuevoTitulo = '';
-  nuevoColor = '#B8E0D2';
   creando: boolean = false;
 
-  coloresPastel = [
+  // Colores fijos para las tarjetas
+  coloresPastel: string[] = [
     '#B8E0D2', '#FFD6B5', '#FFB5C2', '#C9E4DE',
     '#E8D1C5', '#D4E0F0', '#FCE1B3', '#E0D4E8'
   ];
@@ -41,6 +45,7 @@ export class home implements OnInit {
   constructor(
     private router: Router,
     private hogarService: HogarService,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -53,30 +58,37 @@ export class home implements OnInit {
   }
 
   async cargarHogares() {
-  this.loading = true;
-  
-  try {
-    const data = await this.hogarService.getHogares();
-    console.log('📊 Datos recibidos en home:', data);
+    console.log('🔄 Iniciando carga de hogares...');
+    this.loading = true;
+    this.cdr.detectChanges();
     
-    if (Array.isArray(data)) {
-      this.hogares = data.map((hogar: any) => ({
-        ...hogar,
-        color: this.coloresPastel[hogar.id_hogar % this.coloresPastel.length],
-        textColor: this.textColors[this.coloresPastel[hogar.id_hogar % this.coloresPastel.length]] || '#333'
-      }));
-    } else {
+    try {
+      const data = await this.hogarService.getHogares();
+      
+      if (data && Array.isArray(data) && data.length > 0) {
+        this.hogares = data.map((hogar: any) => {
+          const colorIndex = (hogar.id_hogar || 0) % this.coloresPastel.length;
+          const color = this.coloresPastel[colorIndex];
+          
+          return {
+            ...hogar,
+            nombre_familiar: hogar.nombre_familiar || hogar.nombre_hogar || 'Sin nombre',
+            color: color,
+            textColor: this.textColors[color] || '#333'
+          };
+        });
+      } else {
+        this.hogares = [];
+      }
+    } catch (error: any) {
+      console.error('❌ Error:', error);
       this.hogares = [];
+    } finally {
+      this.loading = false;
+      this.cdr.detectChanges();
+      console.log('🏁 loading =', this.loading);
     }
-    
-    console.log('🏠 Hogares procesados:', this.hogares.length);
-  } catch (error) {
-    console.error('❌ Error en cargarHogares:', error);
-    this.hogares = [];
-  } finally {
-    this.loading = false;
   }
-}
 
   abrirModal() {
     this.mostrarModal = true;
@@ -96,13 +108,12 @@ export class home implements OnInit {
   }
 
   this.creando = true;
+  this.error = '';
 
   const result = await this.hogarService.crearHogar(this.nuevoTitulo.trim());
   
   if (result && (result.id_hogar || result.id)) {
     this.cerrarModal();
-    
-    // Forzar actualización después de un pequeño retraso
     setTimeout(() => {
       this.cargarHogares();
     }, 100);
@@ -110,48 +121,89 @@ export class home implements OnInit {
     this.error = result?.detail || 'Error al crear hogar';
   }
   
-  this.creando = false;
+  // Usar setTimeout para cambiar creando a false
+  setTimeout(() => {
+    this.creando = false;
+    this.cdr.detectChanges();
+  }, 0);
 }
 
- async eliminarHogar(hogar: Hogar) {  // ← Recibe el objeto, no el ID
-  const confirmar = confirm(`¿Eliminar el hogar "${hogar.nombre_familiar}"?`);
-  if (!confirmar) return;
-  
-  try {
-    const resultado = await this.hogarService.eliminarHogar(hogar.id_hogar);  // ← Usa hogar.id_hogar
-    if (resultado) {
-      alert('Hogar eliminado correctamente');
-      this.cargarHogares(); // Recargar lista
-    }
-  } catch (error: any) {
-    // Verificar si el error es por miembros asociados
-    if (error?.message?.includes('associated members') || error?.status === 400) {
-      alert('❌ No se puede eliminar el hogar porque tiene miembros asociados. Primero elimina los miembros del hogar.');
-    } else {
-      alert('Error al eliminar el hogar');
+  async eliminarHogar(event: Event, hogar: Hogar) {
+    event.stopPropagation();
+    
+    const confirmar = confirm(`¿Eliminar el hogar "${hogar.nombre_familiar}"?`);
+    if (!confirmar) return;
+    
+    try {
+      const resultado = await this.hogarService.eliminarHogar(hogar.id_hogar);
+      if (resultado) {
+        alert('Hogar eliminado correctamente');
+        this.cargarHogares();
+      }
+    } catch (error: any) {
+      if (error?.message?.includes('associated members') || error?.status === 400) {
+        alert('❌ No se puede eliminar el hogar porque tiene miembros asociados. Primero elimina los miembros del hogar.');
+      } else {
+        alert('Error al eliminar el hogar');
+      }
     }
   }
-}
 
-  async editarHogar(hogar: Hogar) {
-    const nuevoNombre = prompt('Nuevo nombre:', hogar.nombre_familiar);
-    if (!nuevoNombre || !nuevoNombre.trim()) return;
-    
-    const success = await this.hogarService.actualizarHogar(hogar.id_hogar, nuevoNombre.trim());
-    if (success) {
-      await this.cargarHogares();
-    } else {
-      this.error = 'Error al actualizar';
-    }
+  editarHogar(event: Event, hogar: Hogar) {
+    this.abrirModalEditar(event, hogar);
   }
 
   entrarHogar(hogar: Hogar) {
     localStorage.setItem('hogar_actual', JSON.stringify(hogar));
-    this.router.navigate(['/members']);
+    this.router.navigate(['/member']);
   }
 
   trackById(index: number, item: Hogar): number {
     return item.id_hogar;
   }
+
+  abrirModalEditar(event: Event, hogar: Hogar) {
+    event.stopPropagation();
+    
+    this.hogarEditando = hogar;
+    this.nombreEditado = hogar.nombre_familiar;
+    this.mostrarModalEditar = true;
+  }
   
+  cerrarModalEditar() {
+    this.mostrarModalEditar = false;
+    this.hogarEditando = null;
+    this.nombreEditado = '';
+    this.error = '';
+  }
+  
+  async guardarEdicion() {
+  if (!this.nombreEditado.trim()) {
+    this.error = 'Ingresa un nombre';
+    return;
+  }
+  
+  if (!this.hogarEditando) return;
+  
+  this.creando = true;
+  
+  const success = await this.hogarService.actualizarHogar(
+    this.hogarEditando.id_hogar, 
+    this.nombreEditado.trim()
+  );
+  
+  if (success) {
+    this.cerrarModalEditar();
+    await this.cargarHogares();
+  } else {
+    this.error = 'Error al actualizar el hogar';
+  }
+  
+  // Usar setTimeout para cambiar creando a false
+  setTimeout(() => {
+    this.creando = false;
+    this.cdr.detectChanges();
+  }, 0);
+
+}
 }

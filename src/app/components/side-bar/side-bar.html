@@ -13,28 +13,25 @@
   
   <nav class="sidebar-nav">
     <ul class="nav-menu">
-      <!-- CORREGIDO: Lobby es la página principal -->
-      <li (click)="toggle()" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"> 
+      <li (click)="toggle()" routerLink="/lobby" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"> 
         <i class="bi bi-house"></i> 
         <span>Lobby</span> 
       </li>
       
-      <!-- CORREGIDO: Home ahora apunta a /Home (con H mayúscula como en routes) -->
       <li (click)="toggle()" routerLink="/home" routerLinkActive="active"> 
         <i class="bi bi-house-door"></i> 
         <span>Home</span> 
+      </li>
+      
+      <li (click)="toggle()" routerLink="/actarea" routerLinkActive="active"> 
+        <i class="bi bi-card-checklist"></i> 
+        <span>Lista de pendientes</span> 
       </li>
       
       <li (click)="toggle()" routerLink="/settings" routerLinkActive="active"> 
         <i class="bi bi-gear"></i> 
         <span>Ajustes</span> 
       </li>
-
-            <li (click)="toggle()" routerLink="/settings" routerLinkActive="active"> 
-        <i class="bi bi-gear"></i> 
-        <span>dashboard</span> 
-      </li>
-
     </ul>
   </nav>
 
